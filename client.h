@@ -11,4 +11,6 @@ void clientRespond();
 
 void clientInit();
 
+void startClient();
+
 #endif //COLLATZCONJECTURE_CLIENT_H

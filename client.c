@@ -20,3 +20,7 @@ void clientInit()
 {
 
 }
+
+void startClient() {
+
+}
