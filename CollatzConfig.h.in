@@ -1,0 +1,14 @@
+//
+// Created by Nick on 6/8/2017.
+//
+
+#ifndef COLLATZCONJECTURE_COLLATZCONFIG_H_IN
+#define COLLATZCONJECTURE_COLLATZCONFIG_H_IN
+
+// the configured options and settings for Tutorial
+#define Collatz_SERVER 0
+#define Collatz_CLIENT 1
+
+#define Collatz_SERVER_CLIENT @Collatz_SERVER_CLIENT@
+
+#endif //COLLATZCONJECTURE_COLLATZCONFIG_H_IN

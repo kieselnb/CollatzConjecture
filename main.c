@@ -4,6 +4,8 @@
 
 /* INCLUDES */
 
+#include "CollatzConfig.h"
+
 #include <stdio.h>
 #include <unistd.h>
 #include <inttypes.h>
@@ -13,8 +15,6 @@
 #include "client.h"
 
 /* DEFINES */
-
-#define HOST
 
 /* FUNCTION DEFINITIONS */
 
@@ -26,9 +26,9 @@ int main() {
     // collatzInit(&collatzInitialized);
 
     // collatzStart(&threadStop, &currentNum);
-#ifdef HOST
+#if Collatz_SERVER_CLIENT == Collatz_SERVER
     startServer(&collatzInitialized, &threadStop, &currentNum);
-#else
+#elif Collatz_SERVER_CLIENT == Collatz_CLIENT
     startClient();
 #endif
 
