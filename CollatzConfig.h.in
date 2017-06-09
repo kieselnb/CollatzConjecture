@@ -5,7 +5,7 @@
 #ifndef COLLATZCONJECTURE_COLLATZCONFIG_H_IN
 #define COLLATZCONJECTURE_COLLATZCONFIG_H_IN
 
-// the configured options and settings for Tutorial
+// the configured options and settings for CollatzConjecture
 #define Collatz_SERVER 0
 #define Collatz_CLIENT 1
 
