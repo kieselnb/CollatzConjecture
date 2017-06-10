@@ -41,6 +41,8 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
+    printf("Parsing command line args\n");
+
     if (strcmp(argv[1], "--server") == 0) {
         startServer(&collatzInitialized, &threadStop, &currentNum);
     }

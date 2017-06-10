@@ -12,6 +12,10 @@ uint64_t* thisNum;
 
 void (*foo)(uint64_t*);
 
+/*
+ * TODO: make this take more than one number at a time
+ * Probably make it configurable via command line
+ */
 void takeNextNum(uint64_t* numBuf)
 {
     pthread_mutex_lock(&collatzMutex);
@@ -84,7 +88,7 @@ void collatzStart(int* tStop, uint64_t* num)
         pthread_t threadIds[4];
         void * arg = NULL;
         int i = 0;
-        for (i = 0; i < 4; i++) {
+        for (i = 0; i < 8; i++) {
             pthread_create(&threadIds[i], &pthreadAttr, collatzThread, arg);
         }
     } else

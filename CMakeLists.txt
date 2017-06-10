@@ -17,7 +17,7 @@ configure_file (
 )
 
 # add the binary tree to the search path for include files
-# so that we will find TutorialConfig.h
+# so that we will find CollatzConfig.h
 include_directories("${PROJECT_BINARY_DIR}")
 
 set(SOURCE_FILES collatz.c collatz.h main.c server.c server.h client.c client.h types.h plugin_tcp.c plugin_tcp.h)
