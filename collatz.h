@@ -14,7 +14,7 @@ extern "C" {
 
 int collatzRecursive(uint64_t num);
 
-void collatzStart(int* tStop, uint64_t* num);
+void collatzStart(int* tStop, uint64_t* num, int num_threads);
 
 void collatzInit(int* initStatus, void* takeNextNumPointer);
 

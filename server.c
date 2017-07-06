@@ -30,10 +30,10 @@ static void * serverThread(void * arg)
     return 0;
 }
 
-void startServer(int* initStatus, int* threadStop, uint64_t* num) {
+void startServer(int* initStatus, int* threadStop, uint64_t* num, int num_threads) {
     collatzInit(initStatus, &takeNextNum);
     if (initStatus) {
-        collatzStart(threadStop, num);
+        collatzStart(threadStop, num, num_threads);
     }
 }
 

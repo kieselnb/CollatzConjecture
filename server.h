@@ -16,7 +16,7 @@ static void * serverThread(void * arg);
 
 int serverInit();
 
-void startServer(int* initStatus, int* threadStop, uint64_t* num);
+void startServer(int* initStatus, int* threadStop, uint64_t* num, int num_threads);
 
 
 #endif //COLLATZCONJECTURE_SERVER_H

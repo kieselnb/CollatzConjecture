@@ -24,7 +24,7 @@ int collatzInitialized = 0;
 uint64_t currentNum = 1;
 
 void usage() {
-    printf("Usage: CollatzConjecture <type> <[host:]port>\n");
+    printf("Usage: CollatzConjecture <type> <[host:]port> [--num-threads <n>]\n");
     printf("   <type> can be either '--server' or '--client'\n");
     printf("      Server:\n");
     printf("         Specifying 'server' designates this thread as the server for this run\n");
@@ -32,10 +32,12 @@ void usage() {
     printf("         This process will also spawn client threads for each processor on the system\n");
     printf("      Client:\n");
     printf("         The client must be given a host and a port at which a server process is listening\n");
+    printf("   --num-threads <n>\n");
+    printf("      Use n number of threads. Defaults to number of online cores on system\n");
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
+    if (argc != 3 && argc != 5) {
         printf("Invalid number of arguments given\n");
         usage();
         exit(1);
@@ -43,8 +45,15 @@ int main(int argc, char *argv[]) {
 
     printf("Parsing command line args\n");
 
+    // Default number of threads to number of cores
+    int num_threads = sysconf(_SC_NPROCESSORS_ONLN);
+    if (argc == 5 && strcmp(argv[3], "--num-threads") == 0) {
+        num_threads = atoi(argv[4]);
+    }
+    printf("Number of CPUs reported: %d\n", num_threads);
+
     if (strcmp(argv[1], "--server") == 0) {
-        startServer(&collatzInitialized, &threadStop, &currentNum);
+        startServer(&collatzInitialized, &threadStop, &currentNum, num_threads);
     }
     else if (strcmp(argv[1], "--client") == 0) {
         startClient();

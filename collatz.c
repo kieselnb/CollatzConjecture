@@ -48,7 +48,7 @@ int collatzRecursive(uint64_t num)
     }
     else
     {
-        myNum = (3 * myNum) + 1;
+        myNum = ((3 * myNum) + 1) / 2;
         return collatzRecursive(myNum);
     }
 }
@@ -75,7 +75,7 @@ static void * collatzThread(void * arg)
     return 0;
 }
 
-void collatzStart(int* tStop, uint64_t* num)
+void collatzStart(int* tStop, uint64_t* num, int num_threads)
 {
     pthread_attr_t pthreadAttr;
     pthread_attr_init(&pthreadAttr);
@@ -85,10 +85,10 @@ void collatzStart(int* tStop, uint64_t* num)
     if (*initialized)
     {
         printf("Starting threads\n");
-        pthread_t threadIds[4];
+        pthread_t threadIds[num_threads];
         void * arg = NULL;
         int i = 0;
-        for (i = 0; i < 8; i++) {
+        for (i = 0; i < num_threads; i++) {
             pthread_create(&threadIds[i], &pthreadAttr, collatzThread, arg);
         }
     } else
