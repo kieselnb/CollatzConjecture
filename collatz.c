@@ -2,7 +2,10 @@
 // Created by Nick on 9/23/2016.
 //
 
+/// C INCLUDES
 #include <stdio.h>
+
+/// LOCAL INCLUDES
 #include "collatz.h"
 
 pthread_mutex_t collatzMutex;
@@ -10,11 +13,15 @@ int* initialized;
 int* stop;
 uint64_t* thisNum;
 
+const uint64_t STEP = 1<<15;
+
 void (*foo)(uint64_t*);
 
 /*
  * TODO: make this take more than one number at a time
  * Probably make it configurable via command line
+ *
+ * Hard-coded step for now
  */
 void takeNextNum(uint64_t* numBuf)
 {
@@ -25,14 +32,28 @@ void takeNextNum(uint64_t* numBuf)
         *numBuf = 0;
     } else {
         *numBuf = *thisNum;
-        *thisNum = *thisNum + 1;
+        *thisNum = *thisNum + STEP;
     }
     pthread_mutex_unlock(&collatzMutex);
 }
 
-int collatzRecursive(uint64_t num)
-{
+int collatzRecursive(uint64_t num) {
     uint64_t myNum = num;
+    while (myNum > 1 && myNum >= num) {
+        if (myNum % 2 == 0) {
+            myNum = myNum / 2;
+        }
+        else {
+            myNum = ((3 * myNum) + 1) / 2;
+        }
+    }
+    if (myNum > 1 && myNum < num) {
+        return 1;
+    }
+    return myNum;
+
+
+    /* Old recursive strategy. Sucks.
     if (myNum < 1)
     {
         return 0;
@@ -51,6 +72,7 @@ int collatzRecursive(uint64_t num)
         myNum = ((3 * myNum) + 1) / 2;
         return collatzRecursive(myNum);
     }
+    */
 }
 
 static void * collatzThread(void * arg)
@@ -65,11 +87,13 @@ static void * collatzThread(void * arg)
             break;
         }
 
-        if (collatzRecursive(threadNum) == 0) {
-            // Something failed. Trigger an exit
-            pthread_mutex_lock(&collatzMutex);
-            *stop = 1;
-            pthread_mutex_unlock(&collatzMutex);
+        for (unsigned int i = 0; i < STEP; ++i) {
+            if (collatzRecursive(threadNum + i) == 0) {
+                // Something failed. Trigger an exit
+                pthread_mutex_lock(&collatzMutex);
+                *stop = 1;
+                pthread_mutex_unlock(&collatzMutex);
+            }
         }
     }
     return 0;
