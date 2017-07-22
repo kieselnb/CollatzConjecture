@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.5)
 project(CollatzConjecture)
 
 # set debug
@@ -8,6 +8,7 @@ set(CMAKE_BUILD_TYPE Debug)
 find_package(Threads)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 
 set(Collatz_SERVER_CLIENT "Collatz_SERVER" CACHE STRING "Collatz_SERVER_CLIENT chosen by the user at CMake configure time")
 set_property(CACHE Collatz_SERVER_CLIENT PROPERTY STRINGS Collatz_SERVER Collatz_CLIENT)
