@@ -99,7 +99,7 @@ static void * collatzThread(void * arg)
     return 0;
 }
 
-void collatzStart(int* tStop, uint64_t* num, int num_threads)
+void collatzStart(int* tStop, uint64_t* num, long num_threads)
 {
     pthread_attr_t pthreadAttr;
     pthread_attr_init(&pthreadAttr);

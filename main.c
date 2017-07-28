@@ -11,6 +11,7 @@
 #include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 #include "server.h"
 #include "client.h"
@@ -18,6 +19,12 @@
 /* DEFINES */
 
 /* FUNCTION DEFINITIONS */
+
+enum ExecMode {
+    EXEC_SERVER,
+    EXEC_CLIENT,
+    NUM_EXEC_MODES
+};
 
 int threadStop = 0;
 int collatzInitialized = 0;
@@ -37,53 +44,116 @@ void usage() {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 3 && argc != 5) {
-        printf("Invalid number of arguments given\n");
-        usage();
-        exit(1);
-    }
+
+    int exec_mode = NUM_EXEC_MODES;
+    long server_port = -1;
+    long num_threads = -1;
 
     printf("Parsing command line args\n");
 
-    // Default number of threads to number of cores
-    int num_threads = sysconf(_SC_NPROCESSORS_ONLN);
-    if (argc == 5 && strcmp(argv[3], "--num-threads") == 0) {
-        num_threads = atoi(argv[4]);
-    }
-    printf("Number of CPUs reported: %d\n", num_threads);
+    int argi;
+    int skip = 1;
+    for (argi = 0; argi < argc; ++argi) {
+        if (skip > 0) {
+            argi += (--skip);
+            skip = 0;
+            continue;
+        }
 
-    if (strcmp(argv[1], "--server") == 0) {
-        startServer(&collatzInitialized, &threadStop, &currentNum, num_threads);
-    }
-    else if (strcmp(argv[1], "--client") == 0) {
-        startClient();
-    }
-    else {
-        printf("Invalid arguments given\n");
-        usage();
-        exit(2);
-    }
+        if (strcmp(argv[argi], "--server") == 0) {
+            skip = 1;
+            if (exec_mode == NUM_EXEC_MODES) {
+                exec_mode = EXEC_SERVER;
+            }
+            else {
+                printf("Error: multiple execution modes specified, only one allowed.\n");
+                exit(1);
+            }
 
-    // collatzInit(&collatzInitialized);
+            if (argi+1 == argc) {
+                printf("Error: --server must be followed by a port number.\n\n");
+                usage();
+                exit(1);
+            }
 
-    // collatzStart(&threadStop, &currentNum);
-//#if Collatz_SERVER_CLIENT == Collatz_SERVER
-//    startServer(&collatzInitialized, &threadStop, &currentNum);
-//#elif Collatz_SERVER_CLIENT == Collatz_CLIENT
-//    startClient();
-//#endif
+            char **end = &argv[argi+1];
+            long temp_server_port = strtol(argv[argi+1], end, 10);
+            if ((temp_server_port != LONG_MIN) && (temp_server_port != LONG_MAX) && (**end == '\0')) {
+                server_port = temp_server_port;
+            }
+            else {
+                printf("Error: Invalid port given.\n");
+                exit(1);
+            }
+        }
 
-    while (1)
-    {
-        if (threadStop || !collatzInitialized)
-        {
-            // One of the threads triggered a stop or the init failed. Exit
+        else if (strcmp(argv[argi], "--client") == 0) {
+            if (exec_mode == NUM_EXEC_MODES) {
+                exec_mode = EXEC_CLIENT;
+            }
+            else {
+                printf("Error: multiple execution modes specified, only one allowed.\n");
+                exit(1);
+            }
+        }
 
-            return 1;
-        } else
-        {
-            printf("Current value is: %" PRIu64 "\n", currentNum);
-            sleep(10);
+        else if (strcmp(argv[argi], "--num-threads") == 0) {
+            skip = 1;
+            if (argi+1 == argc) {
+                printf("Error: --num-threads must be followed by a number.\n\n");
+                usage();
+                exit(1);
+            }
+
+            if (num_threads == -1) {
+                char **end = &argv[argi+1];
+                long temp_num_threads = strtol(argv[argi+1], end, 10);
+                if ((temp_num_threads != LONG_MAX) && (temp_num_threads != LONG_MIN) && (**end == '\0')) {
+                    num_threads = temp_num_threads;
+                }
+                else {
+                    printf("Error: Invalid number of threads given.\n");
+                    exit(1);
+                }
+            }
+            else {
+                printf("Error: num-threads specified more than once, only one allowed.\n");
+                exit(1);
+            }
+        }
+
+        else {
+            printf("Error: Unknown command line arg '%s'.\n\n", argv[argi]);
+            usage();
+            exit(1);
         }
     }
+
+    long num_logical_cores = sysconf(_SC_NPROCESSORS_ONLN);
+    if (num_threads == -1) {
+        num_threads = num_logical_cores;
+    }
+    else if (num_threads > num_logical_cores) {
+        printf("Warning: Using more threads than there are logical processors.\n");
+    }
+    printf("Using %lu threads\n", num_threads);
+
+    switch (exec_mode) {
+        case EXEC_SERVER:
+            startServer(&collatzInitialized, &threadStop, &currentNum, num_threads);
+            break;
+        case EXEC_CLIENT:
+            startClient();
+            break;
+        default:
+            printf("Error: Unknown exec mode.\n\n");
+            exit(1);
+    }
+
+    while (!threadStop && collatzInitialized) {
+        printf("Current value is: %" PRIu64 "\n", currentNum);
+        sleep(10);
+    }
+
+    return 0;
 }
