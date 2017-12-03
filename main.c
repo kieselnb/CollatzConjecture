@@ -4,8 +4,6 @@
 
 /* INCLUDES */
 
-#include "CollatzConfig.h"
-
 #include <stdio.h>
 #include <unistd.h>
 #include <inttypes.h>
@@ -39,6 +37,7 @@ void usage() {
     printf("         This process will also spawn client threads for each processor on the system\n");
     printf("      Client:\n");
     printf("         The client must be given a host and a port at which a server process is listening\n");
+    printf("\n");
     printf("   --num-threads <n>\n");
     printf("      Use n number of threads. Defaults to number of online cores on system\n");
 }
@@ -151,7 +150,7 @@ int main(int argc, char *argv[]) {
     }
 
     while (!threadStop && collatzInitialized) {
-        printf("Current value is: %" PRIu64 "\n", currentNum);
+        printf("Current value is: %14" PRIu64 "\n", currentNum);
         sleep(10);
     }
 
