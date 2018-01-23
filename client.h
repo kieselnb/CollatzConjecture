@@ -11,6 +11,6 @@ void clientRespond();
 
 void clientInit();
 
-void startClient();
+void startClient(char* hostname, long portno);
 
 #endif //COLLATZCONJECTURE_CLIENT_H

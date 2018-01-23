@@ -37,6 +37,10 @@ void takeNextNum(uint64_t* numBuf)
     pthread_mutex_unlock(&collatzMutex);
 }
 
+/*
+ * TODO: modify this to check against the threshold of this group
+ * of numbers, not each individual number
+ */
 int collatzRecursive(uint64_t num) {
     uint64_t myNum = num;
     while (myNum > 1 && myNum >= num) {

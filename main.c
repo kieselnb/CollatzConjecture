@@ -47,6 +47,7 @@ int main(int argc, char *argv[]) {
     int exec_mode = NUM_EXEC_MODES;
     long server_port = -1;
     long num_threads = -1;
+    char* server_hostname;
 
     printf("Parsing command line args\n");
 
@@ -85,8 +86,8 @@ int main(int argc, char *argv[]) {
                 exit(1);
             }
         }
-
         else if (strcmp(argv[argi], "--client") == 0) {
+            skip = 1;
             if (exec_mode == NUM_EXEC_MODES) {
                 exec_mode = EXEC_CLIENT;
             }
@@ -94,8 +95,37 @@ int main(int argc, char *argv[]) {
                 printf("Error: multiple execution modes specified, only one allowed.\n");
                 exit(1);
             }
-        }
 
+            if (argi+1 == argc) {
+                printf("Error: --client must be followed by a hostname and port number.\n\n");
+                usage();
+                exit(1);
+            }
+
+            // grab server hostname and port from next argument
+            char* temp;
+            // hostname comes before colon
+            temp = strtok(argv[argi+1], ":");
+            server_hostname = (char*) malloc(strlen(temp));
+            strncpy(server_hostname, temp, strlen(temp));
+
+            // port no. comes after colon
+            temp = strtok(NULL, ":");
+            if (temp == NULL) {
+                printf("Error: --client must be given a port number.\n\n");
+                usage();
+                exit(1);
+            }
+            char **end = &temp;
+            long temp_server_port = strtol(temp, end, 10);
+            if ((temp_server_port != LONG_MIN) && (temp_server_port != LONG_MAX) && (**end == '\0')) {
+                server_port = temp_server_port;
+            }
+            else {
+                printf("Error: Invalid port given.\n");
+                exit(1);
+            }
+        }
         else if (strcmp(argv[argi], "--num-threads") == 0) {
             skip = 1;
             if (argi+1 == argc) {
@@ -120,7 +150,6 @@ int main(int argc, char *argv[]) {
                 exit(1);
             }
         }
-
         else {
             printf("Error: Unknown command line arg '%s'.\n\n", argv[argi]);
             usage();
@@ -139,13 +168,14 @@ int main(int argc, char *argv[]) {
 
     switch (exec_mode) {
         case EXEC_SERVER:
-            startServer(&collatzInitialized, &threadStop, &currentNum, num_threads);
+            startServer(&collatzInitialized, &threadStop, &currentNum, num_threads, server_port);
             break;
         case EXEC_CLIENT:
-            startClient();
+            startClient(server_hostname, server_port);
             break;
         default:
             printf("Error: Unknown exec mode.\n\n");
+            usage();
             exit(1);
     }
 

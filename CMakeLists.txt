@@ -30,13 +30,8 @@ add_executable(CollatzConjecture ${SOURCE_FILES})
 set(Collatz_CUDA ON CACHE STRING "To build or not to build the CUDA executable")
 set_property(CACHE Collatz_CUDA PROPERTY TYPE BOOL)
 
-if (Collatz_CUDA)
-# find CUDA
-find_package(CUDA)
-
-# add cuda target
-cuda_add_executable(CollatzConjectureCUDA cuda/collatz.cu)
-endif(Collatz_CUDA)
+# add subdirs
+add_subdirectory(cuda)
 
 target_link_libraries(CollatzConjecture ${CMAKE_THREAD_LIBS_INIT})
 

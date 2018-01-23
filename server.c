@@ -12,8 +12,6 @@
 #include "plugin_tcp.h"
 #include "collatz.h"
 
-uint16_t portno = 8046;
-
 void handleClientRequest()
 {
 
@@ -30,14 +28,14 @@ static void * serverThread(void * arg)
     return 0;
 }
 
-void startServer(int* initStatus, int* threadStop, uint64_t* num, long num_threads) {
+void startServer(int* initStatus, int* threadStop, uint64_t* num, long num_threads, long portno) {
     collatzInit(initStatus, &takeNextNum);
     if (initStatus) {
         collatzStart(threadStop, num, num_threads);
     }
 }
 
-int serverInit() {
+int serverInit(long portno) {
     int sockfd, newsockfd;
     socklen_t clilen;
     char buffer[256];

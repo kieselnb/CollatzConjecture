@@ -24,7 +24,7 @@ void clientInit()
 
 }
 
-void startClient() {
+void startClient(char* hostname, long portno) {
     printf("startClient was called and has not been implemented yet. Exiting\n");
     exit(1);
 }
