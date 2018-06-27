@@ -41,8 +41,9 @@ function getCollatzNetwork(iterationCount) {
             connectionCount[valueEven]++;
 
             // check if we can subtract 1 and divide by 3
-            if ((value - 1) % 3 == 0 &&
-                (value - 1) / 3 > 1) {
+            if (value % 2 == 0
+                && (value - 1) % 3 == 0
+                && (value - 1) / 3 > 1) {
                 // yes, we can
                 valueOdd = (value - 1) / 3;
                 newNodes.push({
@@ -54,8 +55,8 @@ function getCollatzNetwork(iterationCount) {
                 connectionCount[valueOdd]++;
 
                 edges.push({
-                    from: valueOdd,
-                    to: value
+                    from: value,
+                    to: valueOdd
                 });
             }
         }
