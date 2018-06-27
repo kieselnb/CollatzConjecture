@@ -6,7 +6,6 @@ function getCollatzNetwork(iterationCount) {
     var nodes = [];
     var newNodes = [];
     var edges = [];
-    var connectionCount = [];
 
     // add 1 up front, have loop just look at new nodes
     newNodes.push({
@@ -14,15 +13,12 @@ function getCollatzNetwork(iterationCount) {
         label: String(1)
     });
 
-    connectionCount[1] = 0;
-
     for (var i = 0; i < iterationCount; i++) {
         var theseNodes = newNodes;
         newNodes = [];
 
         for (var j = 0; j < theseNodes.length; j++) {
             nodes.push(theseNodes[j]);
-
             var value = theseNodes[j].id;
             
             // always can multiply by 2
@@ -37,9 +33,6 @@ function getCollatzNetwork(iterationCount) {
                 to: valueEven
             });
 
-            connectionCount[value]++;
-            connectionCount[valueEven]++;
-
             // check if we can subtract 1 and divide by 3
             if (value % 2 == 0
                 && (value - 1) % 3 == 0
@@ -50,9 +43,6 @@ function getCollatzNetwork(iterationCount) {
                     id: valueOdd,
                     label: String(valueOdd)
                 });
-
-                connectionCount[value]++;
-                connectionCount[valueOdd]++;
 
                 edges.push({
                     from: value,
