@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(CollatzConjecture)
 
-# set debug
-set(CMAKE_BUILD_TYPE Debug)
-
 # find threading libraries
 find_package(Threads)
 

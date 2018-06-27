@@ -7,7 +7,7 @@ if (Collatz_CUDA)
 find_package(CUDA)
 
 # cuda executable also requires boost
-find_package(Boost)
+find_package(Boost REQUIRED)
 
 # add cuda target
 cuda_add_executable(CollatzConjectureCUDA collatz.cu)
