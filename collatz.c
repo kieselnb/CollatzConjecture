@@ -136,7 +136,7 @@ void collatzInit(int* initStatus, void* takeNextNumPointer)
 
     foo = takeNextNumPointer;
 
-    if ((status1 && status2) == 0)
+    if ((status1 + status2) == 0)
     {
         *initialized = 1;
     }

@@ -1,5 +1,5 @@
 
-set(Collatz_CUDA ON CACHE STRING "To build or not to build the CUDA executable")
+set(Collatz_CUDA OFF CACHE STRING "To build or not to build the CUDA executable")
 set_property(CACHE Collatz_CUDA PROPERTY TYPE BOOL)
 
 if (Collatz_CUDA)
