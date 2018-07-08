@@ -13,7 +13,11 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall")
 # find threading libraries
 find_package(Threads)
 
-set(SOURCE_FILES collatz.c main.c server.c client.c plugin_tcp.c)
+set(SOURCE_FILES src/collatz.c
+                 src/main.c
+                 src/server.c
+                 src/client.c
+                 src/plugin_tcp.c)
 add_executable(CollatzConjecture ${SOURCE_FILES})
 
 # add subdirs
@@ -21,8 +25,8 @@ add_subdirectory(cuda)
 
 target_link_libraries(CollatzConjecture ${CMAKE_THREAD_LIBS_INIT})
 
-add_executable(CollatzConjectureCPP main.cpp
-                                    collatz_counter.cpp
-                                    collatz_runner_cpu.cpp)
+add_executable(CollatzConjectureCPP src/main.cpp
+                                    src/collatz_counter.cpp
+                                    src/collatz_runner_cpu.cpp)
 
 target_link_libraries(CollatzConjectureCPP ${CMAKE_THREAD_LIBS_INIT})
