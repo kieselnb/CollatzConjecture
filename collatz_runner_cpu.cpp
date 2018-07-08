@@ -49,7 +49,7 @@ void CollatzRunnerCPU::runner(CollatzCounter &counter)
     int stride = 1000000;
 
     // perform collatz on said group of numbers
-    while (1) {
+    while (true) {
         unsigned long long int start = counter.take(stride);
         int result = 0;
         for (int i = 0; i < stride; i++) {

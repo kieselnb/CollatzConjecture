@@ -6,7 +6,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-format-style=google")
+set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-format-style=google;-checks=-'*,bugprone-*,cppcoreguidelines-*,clang-analyzer-*,modernize-*,performance-*';-header-filter='.*'")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall")
 

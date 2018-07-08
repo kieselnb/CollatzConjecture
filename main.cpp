@@ -32,11 +32,11 @@ int main(int argc, char* argv[]) {
     }
 
     // start all threads
-    for (unsigned int i = 0; i < runners.size(); i++) {
-        runners[i]->start();
+    for (auto & runner : runners) {
+        runner->start();
     }
 
-    while (1) {
+    while (true) {
         cout << "Current value of the counter is: " << collatzCounter.getCount()
             << endl;
         this_thread::sleep_for(chrono::seconds(10));
