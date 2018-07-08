@@ -21,15 +21,15 @@ CollatzCounter::~CollatzCounter()
     delete counterProtector;
 }
 
-unsigned long long int CollatzCounter::take(int size)
+uint64_t CollatzCounter::take(int size)
 {
     lock_guard<mutex> l(*counterProtector);
-    unsigned long long int current = counter;
+    uint64_t current = counter;
     counter += size;
     return current;
 }
 
-unsigned long long int CollatzCounter::getCount()
+uint64_t CollatzCounter::getCount()
 {
     lock_guard<mutex> l(*counterProtector);
     return counter;

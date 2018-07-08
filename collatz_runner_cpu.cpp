@@ -27,7 +27,7 @@ void CollatzRunnerCPU::join()
     collatzThread->join();
 }
 
-int CollatzRunnerCPU::collatz(unsigned long long int number)
+int CollatzRunnerCPU::collatz(uint64_t number)
 {
     while (number > 1) {
         if (number % 2 == 0) {
@@ -50,7 +50,7 @@ void CollatzRunnerCPU::runner(CollatzCounter &counter)
 
     // perform collatz on said group of numbers
     while (true) {
-        unsigned long long int start = counter.take(stride);
+        uint64_t start = counter.take(stride);
         int result = 0;
         for (int i = 0; i < stride; i++) {
             result = collatz(start + i);

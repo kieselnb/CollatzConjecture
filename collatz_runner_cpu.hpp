@@ -42,7 +42,7 @@ class CollatzRunnerCPU : public CollatzRunner {
          *
          * @return Returns the ending value of the conjecture, should be 1.
          */
-        static int collatz(unsigned long long int number);
+        static int collatz(uint64_t number);
 
         /**
          * Function to pass to thread creator.

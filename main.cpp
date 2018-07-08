@@ -26,9 +26,9 @@ int main(int argc, char* argv[]) {
     cout << "I have " << numProcs << " threads available." << endl;
 
     // kick off runners for each core
-    vector<CollatzRunner*> runners;
+    vector<CollatzRunner*> runners(numProcs);
     for (int i = 0; i < numProcs; i++) {
-        runners.push_back(new CollatzRunnerCPU(collatzCounter));
+        runners[i] = new CollatzRunnerCPU(collatzCounter);
     }
 
     // start all threads

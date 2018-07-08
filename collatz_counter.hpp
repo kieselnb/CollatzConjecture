@@ -32,20 +32,20 @@ class CollatzCounter {
          *
          * @return Returns the value of counter before the increment.
          */
-        unsigned long long int take(int size);
+        uint64_t take(int size);
 
         /**
          * Gets the current value of the counter.
          *
          * @return Returns the current value of counter
          */
-        unsigned long long int getCount();
+        uint64_t getCount();
 
     private:
         /**
          * Counter to keep track of the current Collatz number.
          */
-        unsigned long long int counter;
+        uint64_t counter {1};
 
         /**
          * Mutex to protect the counter.
