@@ -20,19 +20,19 @@ class CollatzRunnerCPU : public CollatzRunner {
         /**
          * Constructor.
          *
-         * @param[in] counter Reference to the 'global' counter to increment.
+         * @param[in] counter Reference to the counter to increment.
          */
         CollatzRunnerCPU(CollatzCounter &counter);
 
         /**
          * Implementation of CollatzRunner::start
          */
-        void start();
+        void start() override;
 
         /**
          * Implementation of CollatzRunner::join
          */
-        void join();
+        void join() override;
 
     private:
         /**
@@ -49,11 +49,6 @@ class CollatzRunnerCPU : public CollatzRunner {
          * Takes a group of numbers from the counter and checks them.
          */
         static void runner(CollatzCounter &counter);
-
-        /**
-         * Pointer to the created thread.
-         */
-        std::thread* collatzThread;
 
 };
 

@@ -29,7 +29,7 @@ class CollatzRunner {
          * @param[in] counter Reference to the 'global' counter
          */
         CollatzRunner(CollatzCounter &counter)
-            : _counter(&counter)
+            : _counter(counter)
         {}
 
         /**
@@ -46,7 +46,12 @@ class CollatzRunner {
         /**
          * Pointer to the counter object.
          */
-        CollatzCounter *_counter;
+        CollatzCounter& _counter;
+        
+        /**
+         * Pointer to the created thread.
+         */
+        std::thread* collatzThread;
 
 };
 

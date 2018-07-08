@@ -19,7 +19,7 @@ CollatzRunnerCPU::CollatzRunnerCPU(CollatzCounter &counter)
 
 void CollatzRunnerCPU::start()
 {
-    collatzThread = new thread(runner, ref(*_counter));
+    collatzThread = new thread(runner, ref(_counter));
 }
 
 void CollatzRunnerCPU::join()

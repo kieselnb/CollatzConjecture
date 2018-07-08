@@ -20,7 +20,7 @@ class CollatzCounter {
         CollatzCounter();
 
         /**
-         * Destructor.
+         * Destructor
          */
         ~CollatzCounter();
 
@@ -29,6 +29,8 @@ class CollatzCounter {
          *
          * @param[in] size Number of elements to "take", aka how much to 
          * increment the counter by.
+         *
+         * @return Returns the value of counter before the increment.
          */
         unsigned long long int take(int size);
 
