@@ -10,6 +10,8 @@ set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-format-style=google;-checks='-*,bugprone-*
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall")
 
+find_package(Boost REQUIRED program_options)
+
 # find threading libraries
 find_package(Threads)
 
@@ -29,4 +31,5 @@ add_executable(CollatzConjectureCPP src/main.cpp
                                     src/collatz_counter.cpp
                                     src/collatz_runner_cpu.cpp)
 
-target_link_libraries(CollatzConjectureCPP ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(CollatzConjectureCPP ${CMAKE_THREAD_LIBS_INIT}
+                                           ${Boost_LIBRARIES})
