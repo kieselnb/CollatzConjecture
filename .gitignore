@@ -1,6 +1,12 @@
+# ignore CMake build artifacts
 CMakeLists.txt.user
 *build*/*
 
+# ignore Visual Studio Code config files
 .vscode/
 
+# ignore node_modules directory
 */node_modules/
+
+# ignore Doxygen generated files
+doc/
