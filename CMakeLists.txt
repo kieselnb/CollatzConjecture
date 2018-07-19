@@ -9,7 +9,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 message("-- Looking for clang-tidy")
 find_program(CLANG_TIDY_EXECUTABLE clang-tidy)
-if(CLANG_TIDY_EXECUTABLE-NOTFOUND)
+if(CLANG_TIDY_EXECUTABLE STREQUAL "CLANG_TIDY_EXECUTABLE-NOTFOUND")
     message("-- Looking for clang-tidy - not found")
 else()
     execute_process(COMMAND ${CLANG_TIDY_EXECUTABLE} -version
@@ -37,14 +37,15 @@ set(SOURCE_FILES src/collatz.c
                  src/plugin_tcp.c)
 add_executable(CollatzConjecture ${SOURCE_FILES})
 
+target_link_libraries(CollatzConjecture ${CMAKE_THREAD_LIBS_INIT})
+
 # add subdirs
 add_subdirectory(cuda)
 
-target_link_libraries(CollatzConjecture ${CMAKE_THREAD_LIBS_INIT})
-
 add_executable(CollatzConjectureCPP src/main.cpp
                                     src/collatz_counter.cpp
-                                    src/collatz_runner_cpu.cpp)
+                                    src/collatz_runner_cpu.cpp
+                                    src/collatz_server.cpp)
 
 target_link_libraries(CollatzConjectureCPP ${CMAKE_THREAD_LIBS_INIT}
                                            ${Boost_LIBRARIES})
