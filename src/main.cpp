@@ -84,15 +84,20 @@ int main(int argc, char* argv[]) {
         runners[i] = new CollatzRunnerCPU(collatzCounter);
     }
 
+    // get value before threads start for perf checking
+    uint64_t lastCount = collatzCounter.getCount();
+
     // start all threads
     for (auto & runner : runners) {
         runner->start();
     }
 
     while (true) {
-        // have some logic to check performance of the threads
-        cout << "Current value of the counter is: " << collatzCounter.getCount()
-            << endl;
+        uint64_t thisCount = collatzCounter.getCount();
+        float perf = float(thisCount - lastCount) / 10.0;
+        cout << "Current: " << thisCount << ". Perf: " << perf
+            << " numbers/sec." << endl;
+        lastCount = thisCount;
         this_thread::sleep_for(chrono::seconds(10));
     }
 
