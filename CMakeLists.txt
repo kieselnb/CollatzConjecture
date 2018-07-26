@@ -44,6 +44,7 @@ add_subdirectory(cuda)
 
 add_executable(CollatzConjectureCPP src/main.cpp
                                     src/collatz_counter.cpp
+                                    src/collatz_counter_client.cpp
                                     src/collatz_runner_cpu.cpp
                                     src/collatz_server.cpp)
 

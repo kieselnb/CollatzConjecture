@@ -78,6 +78,9 @@ void CollatzServer::acceptor(int sockfd, std::list<int> &connections) {
             continue;
         }
 
+        cout << "Received connection from " << inet_ntoa(clientAddr.sin_addr)
+            << ":" << ntohs(clientAddr.sin_port) << endl;
+
         // set new socket to be non-blocking
         if (fcntl(newsockfd, F_SETFD,
                     fcntl(newsockfd, F_GETFD) | O_NONBLOCK) == -1) {

@@ -11,6 +11,7 @@
 #include <boost/program_options.hpp>
 
 #include "collatz_counter.hpp"
+#include "collatz_counter_client.hpp"
 #include "collatz_runner.hpp"
 #include "collatz_runner_cpu.hpp"
 #include "collatz_server.hpp"
@@ -23,9 +24,11 @@ int main(int argc, char* argv[]) {
     po::options_description desc("Options");
     desc.add_options()
         ("help,h", "Display this message")
-        ("cpu,c", po::value<int>(), "Number of cpu threads to use")
+        ("numproc,n", po::value<int>(), "Number of cpu threads to use")
         ("server,s", po::value<short>(),
             "Start a CollatzServer on this machine")
+        ("client,c", po::value<string>(),
+            "Point this machine as a client to the given server")
     ;
 
     po::variables_map vm;
@@ -47,8 +50,8 @@ int main(int argc, char* argv[]) {
     // get number of available threads - use either that or the
     // user-specified number of threads
     int numProcs = thread::hardware_concurrency();
-    if (vm.count("cpu")) {
-        int desiredNumProcs = vm["cpu"].as<int>();
+    if (vm.count("numproc")) {
+        int desiredNumProcs = vm["numproc"].as<int>();
         if (desiredNumProcs > numProcs) {
             cout << "WARNING: using more threads than available on system."
                 << endl << "    Requested " << desiredNumProcs << " threads, "
@@ -59,15 +62,31 @@ int main(int argc, char* argv[]) {
     }
     cout << "Using " << numProcs << " local CPU compute thread(s)." << endl;
 
-    // TODO: make a network counter class implements the same functions as
-    // CollatzCounter (i.e. make CollatzCounter abstract), but ping the
-    // server when those are called
-
-    // TODO: client - have each thread take a new port, so that the only
-    // choke point is at the actual counter object
-
     // shared counter and counter protector
+    // if in client config, we'll just ignore this
     CollatzCounter collatzCounter;
+
+    // make an array of CollatzCounter pointers
+    // if we are in a client configuration, each will be a new instance
+    // of the CollatzCounterClient class
+    // otherwise, all will point to the same CollatzCointer object
+    vector<CollatzCounter*> counters(numProcs);
+
+    if (vm.count("client")) {
+        // parse arg (of form 'x.x.x.x:y' into string ip, short port
+        string ipPort = vm["client"].as<string>();
+        string serverAddress = ipPort.substr(0, ipPort.find(':'));
+        short serverPort = stoi(ipPort.substr(ipPort.find(':') + 1));
+
+        for (auto & counter : counters) {
+            counter = new CollatzCounterClient(serverAddress, serverPort);
+        }
+    }
+    else {
+        for (auto & counter : counters) {
+            counter = &collatzCounter;
+        }
+    }
 
     CollatzServer* server;
     // see if the user wants the server running on this machine
@@ -81,7 +100,7 @@ int main(int argc, char* argv[]) {
     // kick off runners for each core
     vector<CollatzRunner*> runners(numProcs);
     for (int i = 0; i < numProcs; i++) {
-        runners[i] = new CollatzRunnerCPU(collatzCounter);
+        runners[i] = new CollatzRunnerCPU(*counters[i]);
     }
 
     // get value before threads start for perf checking
