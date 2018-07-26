@@ -9,6 +9,7 @@
 
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 
 #include "collatz_counter_client.hpp"
 
@@ -43,4 +44,8 @@ CollatzCounterClient::CollatzCounterClient(const std::string &serverIp,
     }
 
     _initialized = true;
+}
+
+CollatzCounterClient::~CollatzCounterClient() {
+    close(_fd);
 }

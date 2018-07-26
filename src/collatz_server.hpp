@@ -27,7 +27,12 @@ class CollatzServer {
          *                    to pull from.
          * @param[in] port Port number to serve from.
          */
-        CollatzServer(CollatzCounter& counter, short port);
+        CollatzServer(CollatzCounter& counter, unsigned short port);
+
+        /**
+         * Deconstructor.
+         */
+        ~CollatzServer();
 
     private:
         /**
@@ -38,7 +43,7 @@ class CollatzServer {
         /**
          * Port number to serve from.
          */
-        short _port;
+        unsigned short _port;
 
         /**
          * File descriptor of the listening port.

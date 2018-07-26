@@ -24,6 +24,11 @@ class CollatzCounterClient : public CollatzCounter {
          */
         CollatzCounterClient(const std::string &serverIp, short serverPort);
 
+        /**
+         * Deconstructor.
+         */
+        ~CollatzCounterClient();
+
     private:
         /**
          * File descriptor of the serving port.

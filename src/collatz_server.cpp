@@ -11,12 +11,13 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include "collatz_server.hpp"
 
 using namespace std;
 
-CollatzServer::CollatzServer(CollatzCounter& counter, short port)
+CollatzServer::CollatzServer(CollatzCounter& counter, unsigned short port)
     : _counter(counter)
     , _port(port)
     , _initialized(false)
@@ -56,6 +57,14 @@ CollatzServer::CollatzServer(CollatzCounter& counter, short port)
     _poller = thread(poller, this);
 }
 
+CollatzServer::~CollatzServer() {
+    // close all connections
+    close(_fd);
+    for (auto & connection : _connections) {
+        close(connection);
+    }
+}
+
 void CollatzServer::poller(CollatzServer *server) {
     while (true) {
         for (auto &conn : server->_connections) {
@@ -69,7 +78,7 @@ void CollatzServer::poller(CollatzServer *server) {
 void CollatzServer::acceptor(int sockfd, std::list<int> &connections) {
     while (true) {
         struct sockaddr_in clientAddr;
-        socklen_t clientLen;
+        socklen_t clientLen = sizeof(clientAddr);
         cout << "I'm listening..." << endl;
         int newsockfd = accept(sockfd, (struct sockaddr *)&clientAddr,
                 &clientLen);
@@ -78,8 +87,11 @@ void CollatzServer::acceptor(int sockfd, std::list<int> &connections) {
             continue;
         }
 
-        cout << "Received connection from " << inet_ntoa(clientAddr.sin_addr)
-            << ":" << ntohs(clientAddr.sin_port) << endl;
+        char ipAddress[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, (void*)&(clientAddr.sin_addr), ipAddress,
+                INET_ADDRSTRLEN);
+        unsigned short port = ntohs(clientAddr.sin_port);
+        cout << "Received connection from " << ipAddress << ":" << port << endl;
 
         // set new socket to be non-blocking
         if (fcntl(newsockfd, F_SETFD,
