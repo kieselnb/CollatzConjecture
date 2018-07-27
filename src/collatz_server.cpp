@@ -14,6 +14,8 @@
 #include <unistd.h>
 
 #include "collatz_server.hpp"
+#include "collatz_counter.hpp"
+#include "collatz_network_type.hpp"
 
 using namespace std;
 
@@ -67,8 +69,40 @@ CollatzServer::~CollatzServer() {
 
 void CollatzServer::poller(CollatzServer *server) {
     while (true) {
-        for (auto &conn : server->_connections) {
+        int result;
+        CollatzNetworkType request;
+        for (auto &connection : server->_connections) {
             // call recv on each fd to see if they need something
+            result = recv(connection, &request, sizeof(request), 0);
+            if (result < 0) {
+                if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                    // this is fine
+                }
+                else {
+                    cout << "Unexpected error: " << errno << endl;
+                }
+            }
+            else {
+                // serving time
+                switch (request.operation) {
+                    case TAKE:
+                        request.collatzNumber =
+                            server->_counter.take(request.stride);
+                        break;
+                    case GET_COUNT:
+                        request.collatzNumber = server->_counter.getCount();
+                        break;
+                    default:
+                        cout << "Error: I don't know how to serve this request"
+                            << endl;
+                        break;
+                }
+
+                result = send(connection, &request, sizeof(request), 0);
+                if (result < 0) {
+                    cout << "Error: could not send response" << endl;
+                }
+            }
         }
         this_thread::sleep_until(chrono::system_clock::now()
                 + chrono::milliseconds(100));

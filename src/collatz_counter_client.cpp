@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include "collatz_counter_client.hpp"
+#include "collatz_network_type.hpp"
 
 using namespace std;
 
@@ -49,3 +50,52 @@ CollatzCounterClient::CollatzCounterClient(const std::string &serverIp,
 CollatzCounterClient::~CollatzCounterClient() {
     close(_fd);
 }
+
+uint64_t CollatzCounterClient::take(int size) {
+    CollatzNetworkType request;
+    request.operation = TAKE;
+    request.stride = size;
+
+    uint64_t toReturn = 0;
+
+    int result = send(_fd, &request, sizeof(request), 0);
+    if (result < 0) {
+        cout << "Error: failed to send" << endl;
+    }
+    else {
+        // get result. we'll just use the same buffer since we already have it
+        result = recv(_fd, &request, sizeof(request), 0);
+        if (result < 0) {
+            cout << "Error: failed to receive" << endl;
+        }
+        else {
+            toReturn = request.collatzNumber;
+        }
+    }
+
+    return toReturn;
+}
+
+uint64_t CollatzCounterClient::getCount() {
+    CollatzNetworkType request;
+    request.operation = GET_COUNT;
+
+    uint64_t toReturn = 0;
+
+    int result = send(_fd, &request, sizeof(request), 0);
+    if (result < 0) {
+        cout << "Error: failed to send request" << endl;
+    }
+    else {
+        result = recv(_fd, &request, sizeof(request), 0);
+        if (result < 0) {
+            cout << "Error: failed to receive response" << endl;
+        }
+        else {
+            toReturn = request.collatzNumber;
+        }
+    }
+
+    return toReturn;
+}
+

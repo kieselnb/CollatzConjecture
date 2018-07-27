@@ -7,8 +7,13 @@
 #ifndef COLLATZ_NETWORK_TYPE_HPP
 #define COLLATZ_NETWORK_TYPE_HPP
 
+enum CollatzOperation {
+    TAKE,
+    GET_COUNT,
+};
+
 typedef struct CollatzNetworkType {
-    uint32_t clientId;
+    CollatzOperation operation;
     uint64_t collatzNumber;
     uint32_t stride;
 } CollatzNetworkType;

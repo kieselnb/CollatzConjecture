@@ -8,6 +8,7 @@
 #define COLLATZ_COUNTER_CLIENT_HPP
 
 #include "collatz_counter.hpp"
+#include "collatz_counter_client.hpp"
 
 /**
  * This class implements the CollatzCounter interface in a way that pings the
@@ -25,9 +26,26 @@ class CollatzCounterClient : public CollatzCounter {
         CollatzCounterClient(const std::string &serverIp, short serverPort);
 
         /**
-         * Deconstructor.
+         * Destructor.
          */
         ~CollatzCounterClient();
+
+        /**
+         * Override of CollatzCounter's take to request the number from
+         * the server instead of local variable
+         *
+         * @param[in] size Number of numbers to increment the server's counter
+         * @return The current number to start from
+         */
+        uint64_t take(int size) override;
+
+        /**
+         * Override of CollatzCounter's getCount to get the current count
+         * from the server
+         *
+         * @return The current number
+         */
+        uint64_t getCount() override;
 
     private:
         /**

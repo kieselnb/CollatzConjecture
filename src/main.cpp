@@ -12,6 +12,7 @@
 
 #include "collatz_counter.hpp"
 #include "collatz_counter_client.hpp"
+#include "collatz_counter_local.hpp"
 #include "collatz_runner.hpp"
 #include "collatz_runner_cpu.hpp"
 #include "collatz_server.hpp"
@@ -64,7 +65,7 @@ int main(int argc, char* argv[]) {
 
     // shared counter and counter protector
     // if in client config, we'll just ignore this
-    CollatzCounter collatzCounter;
+    CollatzCounterLocal collatzCounter;
 
     // make an array of CollatzCounter pointers
     // if we are in a client configuration, each will be a new instance

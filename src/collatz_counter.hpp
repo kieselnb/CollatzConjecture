@@ -15,16 +15,6 @@
 class CollatzCounter {
     public:
         /**
-         * Constructor
-         */
-        CollatzCounter();
-
-        /**
-         * Destructor
-         */
-        ~CollatzCounter();
-
-        /**
          * Increments counter by the given amount.
          *
          * @param[in] size Number of elements to "take", aka how much to 
@@ -32,16 +22,16 @@ class CollatzCounter {
          *
          * @return Returns the value of counter before the increment.
          */
-        uint64_t take(int size);
+        virtual uint64_t take(int size) = 0;
 
         /**
          * Gets the current value of the counter.
          *
          * @return Returns the current value of counter
          */
-        uint64_t getCount();
+        virtual uint64_t getCount() = 0;
 
-    private:
+    protected:
         /**
          * Counter to keep track of the current Collatz number.
          */
