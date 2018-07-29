@@ -53,7 +53,7 @@ CollatzCounterClient::~CollatzCounterClient() {
 
 uint64_t CollatzCounterClient::take(int size) {
     CollatzNetworkType request;
-    request.operation = TAKE;
+    request.operation = CollatzOperation::TAKE;
     request.stride = size;
 
     uint64_t toReturn = 0;
@@ -78,7 +78,7 @@ uint64_t CollatzCounterClient::take(int size) {
 
 uint64_t CollatzCounterClient::getCount() {
     CollatzNetworkType request;
-    request.operation = GET_COUNT;
+    request.operation = CollatzOperation::GET_COUNT;
 
     uint64_t toReturn = 0;
 

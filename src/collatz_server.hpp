@@ -74,12 +74,13 @@ class CollatzServer {
         /**
          * Accepts new clients for the server.
          */
-        static void acceptor(int sockfd, std::list<int> &connections);
+        static void acceptor(int sockfd, CollatzServer *server);
 
         /**
-         * Loops through the connected clients and handles requests.
+         * One of these is created for each new connection - handles all
+         * requests for that single connection.
          */
-        static void poller(CollatzServer *server);
+        static void connectionHandler(CollatzServer *server, int fd);
 
 };
 

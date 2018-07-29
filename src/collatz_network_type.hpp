@@ -7,10 +7,10 @@
 #ifndef COLLATZ_NETWORK_TYPE_HPP
 #define COLLATZ_NETWORK_TYPE_HPP
 
-enum CollatzOperation {
+typedef enum class CollatzOperation {
     TAKE,
     GET_COUNT,
-};
+} CollatzOperation;
 
 typedef struct CollatzNetworkType {
     CollatzOperation operation;

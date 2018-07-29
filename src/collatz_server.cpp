@@ -6,6 +6,8 @@
 
 #include <iostream>
 #include <thread>
+#include <cerrno>
+#include <cstring>
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -52,64 +54,56 @@ CollatzServer::CollatzServer(CollatzCounter& counter, unsigned short port)
     }
 
     // start acceptor thread
-    _acceptor = thread(acceptor, _fd, ref(_connections));
-
-    // for now, set all sockets to non-blocking and loop through them
-    // periodically in a dedicated thread
-    _poller = thread(poller, this);
+    _acceptor = thread(acceptor, _fd, this);
 }
 
 CollatzServer::~CollatzServer() {
     // close all connections
     close(_fd);
-    for (auto & connection : _connections) {
-        close(connection);
-    }
 }
 
-void CollatzServer::poller(CollatzServer *server) {
+void CollatzServer::connectionHandler(CollatzServer *server, int fd) {
     while (true) {
         int result;
         CollatzNetworkType request;
-        for (auto &connection : server->_connections) {
-            // call recv on each fd to see if they need something
-            result = recv(connection, &request, sizeof(request), 0);
-            if (result < 0) {
-                if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                    // this is fine
-                }
-                else {
-                    cout << "Unexpected error: " << errno << endl;
-                }
+        result = recv(fd, &request, sizeof(request), 0);
+        if (result < 0) {
+            // got some error, report it and quit
+            cout << "recv failed for " << fd << ": " << strerror(errno)
+                << endl;
+            close(fd);
+            return;
+        }
+        else if (result == 0) {
+            // connection closed gracefully, just quit
+            close(fd);
+            return;
+        }
+        else {
+            // serves up
+            switch (request.operation) {
+                case CollatzOperation::TAKE:
+                    request.collatzNumber =
+                        server->_counter.take(request.stride);
+                    break;
+                case CollatzOperation::GET_COUNT:
+                    request.collatzNumber = server->_counter.getCount();
+                    break;
+                default:
+                    cout << "Error: I don't know how to serve this request"
+                        << endl;
+                    break;
             }
-            else {
-                // serving time
-                switch (request.operation) {
-                    case TAKE:
-                        request.collatzNumber =
-                            server->_counter.take(request.stride);
-                        break;
-                    case GET_COUNT:
-                        request.collatzNumber = server->_counter.getCount();
-                        break;
-                    default:
-                        cout << "Error: I don't know how to serve this request"
-                            << endl;
-                        break;
-                }
 
-                result = send(connection, &request, sizeof(request), 0);
-                if (result < 0) {
-                    cout << "Error: could not send response" << endl;
-                }
+            result = send(fd, &request, sizeof(request), 0);
+            if (result < 0) {
+                cout << "Error: could not send response" << endl;
             }
         }
-        this_thread::sleep_until(chrono::system_clock::now()
-                + chrono::milliseconds(100));
     }
 }
 
-void CollatzServer::acceptor(int sockfd, std::list<int> &connections) {
+void CollatzServer::acceptor(int sockfd, CollatzServer* server) {
     while (true) {
         struct sockaddr_in clientAddr;
         socklen_t clientLen = sizeof(clientAddr);
@@ -127,14 +121,9 @@ void CollatzServer::acceptor(int sockfd, std::list<int> &connections) {
         unsigned short port = ntohs(clientAddr.sin_port);
         cout << "Received connection from " << ipAddress << ":" << port << endl;
 
-        // set new socket to be non-blocking
-        if (fcntl(newsockfd, F_SETFD,
-                    fcntl(newsockfd, F_GETFD) | O_NONBLOCK) == -1) {
-            cerr << "ERROR: could not set socket to be non-blocking" << endl;
-        }
-
-        connections.push_back(newsockfd);
-        cout << "Added a new connection" << endl;
+        thread newConnThread(CollatzServer::connectionHandler, server,
+                newsockfd);
+        newConnThread.detach();
     }
 }
 
