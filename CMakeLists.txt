@@ -7,21 +7,26 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-message("-- Looking for clang-tidy")
-find_program(CLANG_TIDY_EXECUTABLE clang-tidy)
-if(CLANG_TIDY_EXECUTABLE STREQUAL "CLANG_TIDY_EXECUTABLE-NOTFOUND")
-    message("-- Looking for clang-tidy - not found")
-else()
-    execute_process(COMMAND ${CLANG_TIDY_EXECUTABLE} -version
-                    OUTPUT_VARIABLE VERSION_OUTPUT)
-    separate_arguments(VERSION_OUTPUT_LIST UNIX_COMMAND "${VERSION_OUTPUT}")
-    list(FIND VERSION_OUTPUT_LIST "version" VERSION_INDEX)
-    math(EXPR VERSION_INDEX "${VERSION_INDEX} + 1")
-    list(GET VERSION_OUTPUT_LIST ${VERSION_INDEX} CLANG_TIDY_VERSION)
-    message("-- Looking for clang-tidy - found version: ${CLANG_TIDY_VERSION}")
-    
-    set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXECUTABLE};-format-style=google;-checks='-*,bugprone-*,clang-analyzer-*,modernize-*,performance-*,';-header-filter='.*,'")
-endif()
+set(USE_LINTER OFF CACHE STRING "To lint or not to lint")
+set_property(CACHE USE_LINTER PROPERTY TYPE BOOL)
+
+if(USE_LINTER)
+    message("-- Looking for clang-tidy")
+    find_program(CLANG_TIDY_EXECUTABLE clang-tidy)
+    if(CLANG_TIDY_EXECUTABLE STREQUAL "CLANG_TIDY_EXECUTABLE-NOTFOUND")
+        message("-- Looking for clang-tidy - not found")
+    else()
+        execute_process(COMMAND ${CLANG_TIDY_EXECUTABLE} -version
+                        OUTPUT_VARIABLE VERSION_OUTPUT)
+        separate_arguments(VERSION_OUTPUT_LIST UNIX_COMMAND "${VERSION_OUTPUT}")
+        list(FIND VERSION_OUTPUT_LIST "version" VERSION_INDEX)
+        math(EXPR VERSION_INDEX "${VERSION_INDEX} + 1")
+        list(GET VERSION_OUTPUT_LIST ${VERSION_INDEX} CLANG_TIDY_VERSION)
+        message("-- Looking for clang-tidy - found version: ${CLANG_TIDY_VERSION}")
+
+        set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXECUTABLE};-format-style=google;-checks='-*,bugprone-*,clang-analyzer-*,modernize-*,performance-*,';-header-filter='.*,'")
+    endif()
+endif(USE_LINTER)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall")
 
