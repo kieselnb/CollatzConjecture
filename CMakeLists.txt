@@ -30,23 +30,10 @@ find_package(Boost REQUIRED program_options)
 # find threading libraries
 find_package(Threads)
 
-set(SOURCE_FILES src/collatz.c
-                 src/main.c
-                 src/server.c
-                 src/client.c
-                 src/plugin_tcp.c)
-add_executable(CollatzConjecture ${SOURCE_FILES})
-
-target_link_libraries(CollatzConjecture ${CMAKE_THREAD_LIBS_INIT})
-
 # add subdirs
+add_subdirectory(c)
+
+add_subdirectory(cpp)
+
 add_subdirectory(cuda)
 
-add_executable(CollatzConjectureCPP src/main.cpp
-                                    src/collatz_counter_local.cpp
-                                    src/collatz_counter_client.cpp
-                                    src/collatz_runner_cpu.cpp
-                                    src/collatz_server.cpp)
-
-target_link_libraries(CollatzConjectureCPP ${CMAKE_THREAD_LIBS_INIT}
-                                           ${Boost_LIBRARIES})
