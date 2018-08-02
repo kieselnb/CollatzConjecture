@@ -46,7 +46,12 @@ server was told to serve from.
 #### C
 The C executable is not built with client/server capabilities, even though it
 claims it is. Run it with the option `--server <port>` to get it to run, but
-it will not serve anything.
+it will not serve anything. This executable, being the original, is just
+called `CollatzConjecture`.
+
+#### CUDA
+The CUDA version of the conjecture is also a standalone application, and acts
+like it. Run it by executing the `CollatzConjectureCUDA` executable.
 
 ### Documentation
 The C++ code has adopted a Doxygen-compatible documentation standard, so
