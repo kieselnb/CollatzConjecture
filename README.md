@@ -1,6 +1,4 @@
 # CollatzConjecture
-C implementation of an exhaustive method of checking the Collatz Conjecture
-
 This project is an exhaustive check of numbers against the Collatz Conjecture
 (explained [here](https://youtu.be/5mFpVDpKX70)).
 
