@@ -10,7 +10,7 @@ great source of coding practice for myself.
 ### Requirements
 * CMake
 * Boost
-* CUDA (for the CUDA executable)
+* CUDA (only if building/running the CUDA executable)
 
 ### Building
 This project uses CMake, so build using this format after cloning:
@@ -37,11 +37,16 @@ executable can take the following options:
 ```
 
 ##### Server/Client Operation
-To start an executable in the serving mode, run with the option `-s <Port>`,
-where `Port` is the number of the port you want to serve from. To connect a
-client to this server, run with the option `-c IP:Port`, where `IP` is the
-address of the machine running the server and `Port` is the port number the
+To start an executable in the serving mode, run with the option `-s <port>`,
+where `port` is the number of the port you want to serve from. To connect a
+client to this server, run with the option `-c <ip:port>`, where `ip` is the
+address of the machine running the server and `port` is the port number the
 server was told to serve from.
+
+#### C
+The C executable is not built with client/server capabilities, even though it
+claims it is. Run it with the option `--server <port>` to get it to run, but
+it will not serve anything.
 
 ### Documentation
 The C++ code has adopted a Doxygen-compatible documentation standard, so
