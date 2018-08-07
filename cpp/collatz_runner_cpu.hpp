@@ -48,7 +48,40 @@ class CollatzRunnerCPU : public CollatzRunner {
          * Function to pass to thread creator.
          * Takes a group of numbers from the counter and checks them.
          */
-        static void runner(CollatzCounter &counter);
+        static void runner(CollatzRunnerCPU& self);
+
+        /**
+         * Function to start monitoring process.
+         * Makes sure we get heartbeats from the runner and optimizes stride
+         * of the runner.
+         */
+        static void monitor(CollatzRunnerCPU& self);
+
+        /**
+         * Used to monitor runner health.
+         */
+        bool heartBeat;
+
+        /**
+         * Heartbeat protector.
+         */
+        std::mutex *heartBeatMtx;
+
+        /**
+         * Triggers a heartbeat.
+         */
+        void beat();
+
+        /**
+         * Checks heartbeat, requires object to not worry about passing
+         * mutex around.
+         */
+        bool isAlive();
+
+        /**
+         * Monitor thread handle.
+         */
+        std::thread* monitorThread;
 
 };
 

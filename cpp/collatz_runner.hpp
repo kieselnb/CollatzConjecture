@@ -47,11 +47,21 @@ class CollatzRunner {
          * Pointer to the counter object.
          */
         CollatzCounter& _counter;
+
+        /**
+         * Number of numbers to take at a time;
+         */
+        int _stride;
         
         /**
          * Pointer to the created thread.
          */
         std::thread* collatzThread;
+
+        /**
+         * Pointer to the health monitor/performance thread.
+         */
+        std::thread* collatzPerfHMThread;
 
 };
 
