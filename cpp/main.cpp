@@ -15,6 +15,7 @@
 #include "collatz_counter_local.hpp"
 #include "collatz_runner.hpp"
 #include "collatz_runner_cpu.hpp"
+#include "collatz_runner_gpu.cuh"
 #include "collatz_server.hpp"
 
 using namespace std;
@@ -64,6 +65,14 @@ int main(int argc, char* argv[]) {
     }
     cout << "Using " << numProcs << " local CPU compute thread(s)." << endl;
 
+    bool useGPU = false;
+    if (vm.count("gpu")) {
+        cout << "Using local GPU" << endl;
+        useGPU = true;
+    }
+
+    int numRunners = useGPU ? (numProcs + 1) : numProcs;
+
     // shared counter and counter protector
     // if in client config, we'll just ignore this
     CollatzCounterLocal collatzCounter;
@@ -72,7 +81,7 @@ int main(int argc, char* argv[]) {
     // if we are in a client configuration, each will be a new instance
     // of the CollatzCounterClient class
     // otherwise, all will point to the same CollatzCointer object
-    vector<CollatzCounter*> counters(numProcs);
+    vector<CollatzCounter*> counters(numRunners);
 
     if (vm.count("client")) {
         // parse arg (of form 'x.x.x.x:y' into string ip, short port
@@ -100,9 +109,14 @@ int main(int argc, char* argv[]) {
     }
 
     // kick off runners for each core
-    vector<CollatzRunner*> runners(numProcs);
+    vector<CollatzRunner*> runners(numRunners);
     for (int i = 0; i < numProcs; i++) {
         runners[i] = new CollatzRunnerCPU(*counters[i]);
+    }
+
+    // if using GPU, last runner is GPU
+    if (useGPU) {
+        runners[numRunners-1] = new CollatzRunnerGPU(*counters[numRunners-1]);
     }
 
     // get value before threads start for perf checking
