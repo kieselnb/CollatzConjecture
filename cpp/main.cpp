@@ -26,6 +26,7 @@ int main(int argc, char* argv[]) {
     desc.add_options()
         ("help,h", "Display this message")
         ("numproc,n", po::value<int>(), "Number of cpu threads to use")
+        ("gpu,g", "Activate the gpu thread")
         ("server,s", po::value<short>(),
             "Start a CollatzServer on this machine")
         ("client,c", po::value<string>(),
@@ -112,6 +113,7 @@ int main(int argc, char* argv[]) {
         runner->start();
     }
 
+    // idle loop to calculate perf and watch progress
     while (true) {
         uint64_t thisCount = collatzCounter.getCount();
         float perf = float(thisCount - lastCount) / 10.0;
