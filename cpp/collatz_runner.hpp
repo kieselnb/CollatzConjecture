@@ -56,12 +56,12 @@ class CollatzRunner {
         /**
          * Pointer to the created thread.
          */
-        std::thread* collatzThread;
+        std::thread* _collatzThread;
 
         /**
          * Pointer to the health monitor/performance thread.
          */
-        std::thread* collatzPerfHMThread;
+        std::thread* _collatzPerfHMThread;
 
 };
 

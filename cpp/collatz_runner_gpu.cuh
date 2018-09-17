@@ -4,8 +4,8 @@
  * This file contains the declaration of the CollatzRunnerGPU class.
  */
 
-#ifndef COLLATZ_RUNNER_GPU_H
-#define COLLATZ_RUNNER_GPU_H
+#ifndef COLLATZ_RUNNER_GPU_CUH
+#define COLLATZ_RUNNER_GPU_CUH
 
 #include "collatz_runner.hpp"
 #include "collatz_counter.hpp"
@@ -25,6 +25,11 @@ class CollatzRunnerGPU : public CollatzRunner {
         CollatzRunnerGPU(CollatzCounter &counter);
 
         /**
+         * Destructor
+         */
+        ~CollatzRunnerGPU();
+
+        /**
          * Implementation of CollatzRunner::start
          */
         void start() override;
@@ -35,8 +40,27 @@ class CollatzRunnerGPU : public CollatzRunner {
         void join() override;
 
     private:
+        /**
+         * Thread to run the GPU collatz implementation.
+         * Has an infinite loop - to be started in a new thread.
+         * 
+         * @param[in] self Running object to access things.
+         */
         static void runner(CollatzRunnerGPU& self);
 
+        /**
+         * Pointer to GPU status variable, to be set to 0 if
+         * something failed.
+         *
+         * Declared here in order to be RAII style.
+         */
+        int *_dStatus;
+
+        /**
+         * To see if we successfully allocated memory.
+         */
+        bool _initialized;
+
 };
-        
-#endif  /* COLLATZ_RUNNER_GPU_H */
+
+#endif  /* COLLATZ_RUNNER_GPU_CUH */

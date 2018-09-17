@@ -20,13 +20,13 @@ CollatzRunnerCPU::CollatzRunnerCPU(CollatzCounter &counter)
 
 void CollatzRunnerCPU::start()
 {
-    collatzThread = new thread(runner, ref(*this));
+    _collatzThread = new thread(runner, ref(*this));
     monitorThread = new thread(monitor, ref(*this));
 }
 
 void CollatzRunnerCPU::join()
 {
-    collatzThread->join();
+    _collatzThread->join();
 }
 
 int CollatzRunnerCPU::collatz(uint64_t number)
