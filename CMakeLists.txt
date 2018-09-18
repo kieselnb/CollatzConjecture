@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.5)
 project(CollatzConjecture C CXX)
 
 option(ENABLE_CUDA "Enable CUDA GPU implementation of Collatz" OFF)
-
 if(ENABLE_CUDA)
     enable_language(CUDA)
 endif()
@@ -40,7 +39,7 @@ find_package(Boost REQUIRED program_options)
 # find threading libraries
 find_package(Threads)
 
-# generate header file to pass in options
+# generate header file for compilation macros (cuda)
 configure_file (
     "${PROJECT_SOURCE_DIR}/config.h.in"
     "${PROJECT_BINARY_DIR}/config.h"
