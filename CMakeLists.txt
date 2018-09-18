@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
-project(CollatzConjecture C CXX CUDA)
+project(CollatzConjecture C CXX)
+
+option(ENABLE_CUDA "Enable CUDA GPU implementation of Collatz" OFF)
+
+if(ENABLE_CUDA)
+    enable_language(CUDA)
+endif()
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -7,8 +13,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(USE_LINTER OFF CACHE STRING "To lint or not to lint")
-set_property(CACHE USE_LINTER PROPERTY TYPE BOOL)
+option(USE_LINTER "To lint or not to lint" OFF)
 
 if(USE_LINTER)
     message("-- Looking for clang-tidy")
@@ -34,6 +39,13 @@ find_package(Boost REQUIRED program_options)
 
 # find threading libraries
 find_package(Threads)
+
+# generate header file to pass in options
+configure_file (
+    "${PROJECT_SOURCE_DIR}/config.h.in"
+    "${PROJECT_BINARY_DIR}/config.h"
+)
+include_directories("${PROJECT_BINARY_DIR}")
 
 # add subdirs
 add_subdirectory(c)

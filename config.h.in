@@ -1,0 +1,12 @@
+/**
+ * @file config.h
+ *
+ * This file contains project configuration information from CMake.
+ */
+
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#cmakedefine ENABLE_CUDA
+
+#endif  /* CONFIG_H */
