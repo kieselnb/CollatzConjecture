@@ -7,7 +7,6 @@
 #ifndef COLLATZ_COUNTER_LOCAL_HPP
 #define COLLATZ_COUNTER_LOCAL_HPP
 
-#include "collatz_counter_local.hpp"
 #include "collatz_counter.hpp"
 
 class CollatzCounterLocal : public CollatzCounter {

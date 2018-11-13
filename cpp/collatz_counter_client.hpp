@@ -8,7 +8,6 @@
 #define COLLATZ_COUNTER_CLIENT_HPP
 
 #include "collatz_counter.hpp"
-#include "collatz_counter_client.hpp"
 
 /**
  * This class implements the CollatzCounter interface in a way that pings the

@@ -1,5 +1,5 @@
 /**
- * @file collatz_runner_gpu.cpp
+ * @file collatz_runner_gpu.cu
  *
  * This file contains the definition of the CollatzRunnerGPU class
  */
