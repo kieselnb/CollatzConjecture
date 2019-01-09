@@ -51,7 +51,7 @@ CollatzCounterClient::~CollatzCounterClient() {
     close(_fd);
 }
 
-uint64_t CollatzCounterClient::take(int size) {
+uint64_t CollatzCounterClient::take(unsigned int size) {
     CollatzNetworkType request;
     request.operation = CollatzOperation::TAKE;
     request.stride = size;

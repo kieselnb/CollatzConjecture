@@ -21,7 +21,7 @@ class CollatzCounterLocal : public CollatzCounter {
          */
         ~CollatzCounterLocal();
 
-        uint64_t take(int size) override;
+        uint64_t take(unsigned int size) override;
 
         uint64_t getCount() override;
 

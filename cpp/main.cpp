@@ -20,6 +20,7 @@
 
 #ifdef ENABLE_CUDA
 #include "collatz_runner_gpu.cuh"
+#include "collatz_runner_boost.h"
 #endif
 
 using namespace std;
@@ -30,10 +31,11 @@ int main(int argc, char* argv[]) {
     po::options_description desc("Options");
     desc.add_options()
         ("help,h", "Display this message")
-        ("numproc,n", po::value<int>(), "Number of cpu threads to use")
+        ("numproc,n", po::value<unsigned int>(), "Number of cpu threads to use")
 #ifdef ENABLE_CUDA
         ("gpu,g", "Activate the gpu thread")
 #endif
+        ("opencl,o", "Use OpenCL to run the gpu thread")
         ("server,s", po::value<short>(),
             "Start a CollatzServer on this machine")
         ("client,c", po::value<string>(),
@@ -58,9 +60,9 @@ int main(int argc, char* argv[]) {
 
     // get number of available threads - use either that or the
     // user-specified number of threads
-    int numProcs = thread::hardware_concurrency();
+    unsigned int numProcs = thread::hardware_concurrency();
     if (vm.count("numproc")) {
-        int desiredNumProcs = vm["numproc"].as<int>();
+        unsigned int desiredNumProcs = vm["numproc"].as<unsigned int>();
         if (desiredNumProcs > numProcs) {
             cout << "WARNING: using more threads than available on system."
                 << endl << "    Requested " << desiredNumProcs << " threads, "
@@ -71,15 +73,28 @@ int main(int argc, char* argv[]) {
     }
     cout << "Using " << numProcs << " local CPU compute thread(s)." << endl;
 
+    // expose CUDA and OpenCL separately, but only use one
+
     bool useGPU = false;
+    bool useCUDA = false;
 #ifdef ENABLE_CUDA
     if (vm.count("gpu")) {
         cout << "Using local GPU" << endl;
         useGPU = true;
+        useCUDA = true;
     }
 #endif
 
-    int numRunners = useGPU ? (numProcs + 1) : numProcs;
+    if (vm.count("opencl")) {
+        if (useCUDA) {
+            std::cout << "Cannot use both CUDA and OpenCL simultaneously - pick one"
+                      << std::endl;
+            return 1;
+        }
+        useGPU = true;
+    }
+
+    unsigned int numRunners = useGPU ? (numProcs + 1) : numProcs;
 
     // shared counter and counter protector
     // if in client config, we'll just ignore this
@@ -118,16 +133,15 @@ int main(int argc, char* argv[]) {
 
     // kick off runners for each core
     vector<CollatzRunner*> runners(numRunners);
-    for (int i = 0; i < numProcs; i++) {
+    for (unsigned int i = 0; i < numProcs; i++) {
         runners[i] = new CollatzRunnerCPU(*counters[i]);
     }
 
-#ifdef ENABLE_CUDA
     // if using GPU, last runner is GPU
     if (useGPU) {
-        runners[numRunners-1] = new CollatzRunnerGPU(*counters[numRunners-1]);
+        runners[numRunners-1] = useCUDA ? (CollatzRunner*)new CollatzRunnerGPU(*counters[numRunners-1])
+                                        : (CollatzRunner*)new CollatzRunnerBoost(*counters[numRunners-1]);
     }
-#endif
 
     // get value before threads start for perf checking
     uint64_t lastCount = collatzCounter.getCount();

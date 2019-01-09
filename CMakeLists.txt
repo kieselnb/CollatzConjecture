@@ -4,6 +4,7 @@ project(CollatzConjecture C CXX)
 option(ENABLE_CUDA "Enable CUDA GPU implementation of Collatz" OFF)
 if(ENABLE_CUDA)
     enable_language(CUDA)
+    find_package(OpenCL)
 endif()
 
 set(CMAKE_CXX_STANDARD 11)

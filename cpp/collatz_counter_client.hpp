@@ -36,7 +36,7 @@ class CollatzCounterClient : public CollatzCounter {
          * @param[in] size Number of numbers to increment the server's counter
          * @return The current number to start from
          */
-        uint64_t take(int size) override;
+        uint64_t take(unsigned int size) override;
 
         /**
          * Override of CollatzCounter's getCount to get the current count

@@ -22,7 +22,7 @@ class CollatzCounter {
          *
          * @return Returns the value of counter before the increment.
          */
-        virtual uint64_t take(int size) = 0;
+        virtual uint64_t take(unsigned int size) = 0;
 
         /**
          * Gets the current value of the counter.

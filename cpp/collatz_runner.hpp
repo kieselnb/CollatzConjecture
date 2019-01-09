@@ -51,7 +51,7 @@ class CollatzRunner {
         /**
          * Number of numbers to take at a time;
          */
-        int _stride;
+        unsigned int _stride;
         
         /**
          * Pointer to the created thread.

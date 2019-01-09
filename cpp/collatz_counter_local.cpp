@@ -21,7 +21,7 @@ CollatzCounterLocal::~CollatzCounterLocal()
     delete counterProtector;
 }
 
-uint64_t CollatzCounterLocal::take(int size)
+uint64_t CollatzCounterLocal::take(unsigned int size)
 {
     lock_guard<mutex> l(*counterProtector);
     uint64_t current = counter;
