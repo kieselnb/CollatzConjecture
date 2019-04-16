@@ -34,6 +34,11 @@ class CollatzServer {
          */
         ~CollatzServer();
 
+        /**
+         * Starts the acceptor thread.
+         */
+        void run();
+
     private:
         /**
          * The One Counter Object to pull from.

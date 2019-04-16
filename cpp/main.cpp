@@ -110,10 +110,17 @@ int main(int argc, char* argv[]) {
         // parse arg (of form 'x.x.x.x:y' into string ip, short port
         string ipPort = vm["client"].as<string>();
         string serverAddress = ipPort.substr(0, ipPort.find(':'));
-        short serverPort = stoi(ipPort.substr(ipPort.find(':') + 1));
-
-        for (auto & counter : counters) {
-            counter = new CollatzCounterClient(serverAddress, serverPort);
+        int given = stoi(ipPort.substr(ipPort.find(':') + 1));
+        if (given > numeric_limits<unsigned short>::min() &&
+                given < numeric_limits<unsigned short>::max()) {
+            auto serverPort = static_cast<unsigned short>(given);
+            for (auto & counter : counters) {
+                counter = new CollatzCounterClient(serverAddress, serverPort);
+            }
+        }
+        else {
+            cerr << "Invalid port" << endl;
+            exit(1);
         }
     }
     else {
@@ -128,6 +135,7 @@ int main(int argc, char* argv[]) {
         cout << "Starting server..." << endl;
         short port = vm["server"].as<short>();
         server = new CollatzServer(collatzCounter, port);
+        server->run();
         cout << "Starting server... done" << endl;
     }
 
@@ -154,7 +162,7 @@ int main(int argc, char* argv[]) {
     // idle loop to calculate perf and watch progress
     while (true) {
         uint64_t thisCount = collatzCounter.getCount();
-        float perf = float(thisCount - lastCount) / 10.0;
+        float perf = float(thisCount - lastCount) / 10.0f;
         cout << "Current: " << thisCount << ". Perf: " << perf
             << " numbers/sec." << endl;
         lastCount = thisCount;

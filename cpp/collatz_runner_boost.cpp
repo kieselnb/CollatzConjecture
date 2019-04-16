@@ -52,7 +52,14 @@ void CollatzRunnerBoost::join()
 
 void CollatzRunnerBoost::runner(CollatzRunnerBoost &self)
 {
-    boost::compute::device gpu = boost::compute::system::default_device();
+    auto devices = boost::compute::system::devices();
+    std::cout << "Avaialble devices:" << std::endl;
+    for (auto &device : devices) {
+        std::cout << "\t" << device.name() << std::endl;
+    }
+
+    boost::compute::device gpu = devices[1];
+    //boost::compute::device gpu = boost::compute::system::default_device();
     boost::compute::context ctx(gpu);
     boost::compute::command_queue queue(ctx, gpu);
 
@@ -81,18 +88,16 @@ void CollatzRunnerBoost::runner(CollatzRunnerBoost &self)
                         collatz,
                         queue);
 
-        boost::compute::copy(
+        std::vector<uint64_t> result(1);
+        boost::compute::reduce(
                     d_numbers.begin(),
                     d_numbers.end(),
-                    numbers.begin(),
+                    result.begin(),
                     queue);
 
-        for (auto number : numbers)
+        if (result[0] != self._stride)
         {
-            if (number != 1) {
-                std::cout << "WE BROKE SOMETHING" << std::endl;
-                break;
-            }
+            std::cout << "WE BROKE SOMETHING" << std::endl;
         }
     }
 }

@@ -17,7 +17,7 @@
 using namespace std;
 
 CollatzCounterClient::CollatzCounterClient(const std::string &serverIp,
-        short serverPort) {
+        unsigned short serverPort) {
     struct sockaddr_in serverAddress;
     
     _fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -26,7 +26,7 @@ CollatzCounterClient::CollatzCounterClient(const std::string &serverIp,
         return;
     }
 
-    bzero(&serverAddress, sizeof(serverAddress));
+    memset(&serverAddress, 0, sizeof(serverAddress));
 
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(serverPort);

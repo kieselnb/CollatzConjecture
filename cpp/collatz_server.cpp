@@ -53,13 +53,16 @@ CollatzServer::CollatzServer(CollatzCounter& counter, unsigned short port)
         return;
     }
 
-    // start acceptor thread
-    _acceptor = thread(acceptor, _fd, this);
 }
 
 CollatzServer::~CollatzServer() {
     // close all connections
     close(_fd);
+}
+
+void CollatzServer::run() {
+    // start acceptor thread
+    _acceptor = thread(acceptor, _fd, this);
 }
 
 void CollatzServer::connectionHandler(CollatzServer *server, int fd) {

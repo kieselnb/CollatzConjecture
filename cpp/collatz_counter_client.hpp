@@ -22,7 +22,8 @@ class CollatzCounterClient : public CollatzCounter {
          * @param[in] serverIp IP address of the server.
          * @param[in] serverPort Port of the server.
          */
-        CollatzCounterClient(const std::string &serverIp, short serverPort);
+        CollatzCounterClient(const std::string &serverIp,
+                unsigned short serverPort);
 
         /**
          * Destructor.

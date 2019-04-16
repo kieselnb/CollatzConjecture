@@ -43,7 +43,7 @@ void takeNextNum(uint64_t* numBuf)
  */
 int collatzRecursive(uint64_t num) {
     uint64_t myNum = num;
-    while (myNum > 1 && myNum >= num) {
+    while (myNum > 1 /*&& myNum >= num*/) {
         if (myNum % 2 == 0) {
             myNum = myNum / 2;
         }
@@ -55,28 +55,6 @@ int collatzRecursive(uint64_t num) {
         return 1;
     }
     return myNum;
-
-
-    /* Old recursive strategy. Sucks.
-    if (myNum < 1)
-    {
-        return 0;
-    }
-    else if (myNum == 1)
-    {
-        return 1;
-    }
-    else if (myNum % 2 == 0)
-    {
-        myNum = myNum / 2;
-        return collatzRecursive(myNum);
-    }
-    else
-    {
-        myNum = ((3 * myNum) + 1) / 2;
-        return collatzRecursive(myNum);
-    }
-    */
 }
 
 static void * collatzThread(void * arg)

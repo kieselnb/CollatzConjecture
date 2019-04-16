@@ -21,7 +21,7 @@ CollatzRunnerCPU::CollatzRunnerCPU(CollatzCounter &counter)
 void CollatzRunnerCPU::start()
 {
     _collatzThread = new thread(runner, ref(*this));
-    monitorThread = new thread(monitor, ref(*this));
+    //monitorThread = new thread(monitor, ref(*this));
 }
 
 void CollatzRunnerCPU::join()
@@ -34,11 +34,11 @@ int CollatzRunnerCPU::collatz(uint64_t number)
     while (number > 1) {
         if (number % 2 == 0) {
             // even, divide by two
-            number /= 2;
+            number >>= 1;
         }
         else {
             // odd, multiply by 3, add 1, div 2 again
-            number = (3 * number + 1) / 2;
+            number = (3 * number + 1) >> 1;
         }
     }
 
@@ -48,14 +48,14 @@ int CollatzRunnerCPU::collatz(uint64_t number)
 void CollatzRunnerCPU::runner(CollatzRunnerCPU& self)
 {
     // this will be the function called by thread creator
-    self._stride = 1<<12;
+    self._stride = 1<<20;
 
     // perform collatz on said group of numbers
     while (true) {
-        self.beat();
+        //self.beat();
         uint64_t start = self._counter.take(self._stride);
         int result = 0;
-        for (int i = 0; i < self._stride; i++) {
+        for (unsigned int i = 0; i < self._stride; i++) {
             result = collatz(start + i);
             if (result != 1) {
                 cout << "WE BROKE SOMETHING" << endl;
