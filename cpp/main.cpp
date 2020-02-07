@@ -26,6 +26,18 @@
 using namespace std;
 namespace po = boost::program_options;
 
+void usage() {
+    std::cout
+        << "Options:\n"
+        << "  -h [ --help ]         Display this message\n"
+        << "  -n [ --numproc ] arg  Number of CPU threads to use\n"
+        << "  -g [ --gpu ]          Run the CUDA implementation on the GPU\n"
+        << "  -o [ --opencl ]       Run the OpenCL implementation on the GPU\n"
+        << "  -s [ --server ] arg   Start a CollatzServer on this machine\n"
+        << "  -c [ --client ] arg   Point this machine as a client to the given server\n"
+        << std::endl;
+}
+
 int main(int argc, char* argv[]) {
     // parse options
     po::options_description desc("Options");
@@ -52,25 +64,53 @@ int main(int argc, char* argv[]) {
     }
     po::notify(vm);
 
-    // check if the user needs help. help the best way we know how
-    if (vm.count("help")) {
-        cout << desc << endl;
-        return 1;
-    }
-
     // get number of available threads - use either that or the
     // user-specified number of threads
     unsigned int numProcs = thread::hardware_concurrency();
-    if (vm.count("numproc")) {
-        unsigned int desiredNumProcs = vm["numproc"].as<unsigned int>();
-        if (desiredNumProcs > numProcs) {
-            cout << "WARNING: using more threads than available on system."
-                << endl << "    Requested " << desiredNumProcs << " threads, "
-                << "system reports " << numProcs << " threads available."
-                << endl;
+
+    int skip = 0;
+    for (int i = 0; i < argc; i += 1 + skip) {
+        skip = 0;
+
+        std::string arg(argv[i]);
+        if (arg == "-h" || arg == "--help") {
+            usage();
+            exit(0);
         }
-        numProcs = desiredNumProcs;
+        else if (arg == "-n" || arg == "--numproc") {
+            skip = 1;
+            bool threw = false;
+
+            std::string numProcArg = argv[i+1];
+            std::size_t pos;
+            unsigned int desiredNumProcs;
+            try {
+                desiredNumProcs = std::stoul(numProcArg, &pos);
+            }
+            catch (std::invalid_argument const &e) {
+                std::cerr << "Invalid number: " << numProcArg << std::endl;
+                threw = true;
+            }
+            catch (std::out_of_range const &e) {
+                std::cerr << "Number out of range: " << numProcArg << std::endl;
+                threw = true;
+            }
+
+            if (threw || std::to_string(desiredNumProcs).size() != pos) {
+                std::cerr << "Conversion failed" << std::endl;
+                exit(1);
+            }
+
+            if (numProcs < desiredNumProcs) {
+                std::cout << "WARNING: using more threads than available on system."
+                    << std::endl << "    Requested " << desiredNumProcs << " threads, "
+                    << "system reports " << numProcs << " threads available."
+                    << std::endl;
+            }
+            numProcs = desiredNumProcs;
+        }
     }
+
     cout << "Using " << numProcs << " local CPU compute thread(s)." << endl;
 
     // expose CUDA and OpenCL separately, but only use one
