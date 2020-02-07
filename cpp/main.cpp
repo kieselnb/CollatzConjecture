@@ -34,8 +34,8 @@ int main(int argc, char* argv[]) {
         ("numproc,n", po::value<unsigned int>(), "Number of cpu threads to use")
 #ifdef ENABLE_CUDA
         ("gpu,g", "Activate the gpu thread")
-#endif
         ("opencl,o", "Use OpenCL to run the gpu thread")
+#endif
         ("server,s", po::value<short>(),
             "Start a CollatzServer on this machine")
         ("client,c", po::value<string>(),
@@ -76,14 +76,13 @@ int main(int argc, char* argv[]) {
     // expose CUDA and OpenCL separately, but only use one
 
     bool useGPU = false;
-    bool useCUDA = false;
 #ifdef ENABLE_CUDA
+    bool useCUDA = false;
     if (vm.count("gpu")) {
         cout << "Using local GPU" << endl;
         useGPU = true;
         useCUDA = true;
     }
-#endif
 
     if (vm.count("opencl")) {
         if (useCUDA) {
@@ -93,6 +92,7 @@ int main(int argc, char* argv[]) {
         }
         useGPU = true;
     }
+#endif
 
     unsigned int numRunners = useGPU ? (numProcs + 1) : numProcs;
 
@@ -146,10 +146,12 @@ int main(int argc, char* argv[]) {
     }
 
     // if using GPU, last runner is GPU
+#ifdef ENABLE_CUDA
     if (useGPU) {
         runners[numRunners-1] = useCUDA ? (CollatzRunner*)new CollatzRunnerGPU(*counters[numRunners-1])
                                         : (CollatzRunner*)new CollatzRunnerBoost(*counters[numRunners-1]);
     }
+#endif
 
     // get value before threads start for perf checking
     uint64_t lastCount = collatzCounter.getCount();

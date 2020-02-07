@@ -1,13 +1,17 @@
+/* Just disable the entire file if GPU was disabled */
+#include "config.h"
+
+#ifdef ENABLE_CUDA
+
+#include "collatz_runner_boost.h"
+#include "collatz_counter.hpp"
+
 #include <vector>
 #include <algorithm>
 #include <iostream>
 #include <thread>
 
 #include <boost/compute.hpp>
-
-#include "collatz_runner_boost.h"
-#include "collatz_counter.hpp"
-
 
 // class generator:
 static struct c_unique {
@@ -101,3 +105,5 @@ void CollatzRunnerBoost::runner(CollatzRunnerBoost &self)
         }
     }
 }
+
+#endif
