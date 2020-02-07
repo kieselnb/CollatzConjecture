@@ -8,5 +8,5 @@ add_executable(CollatzConjectureCPP main.cpp
 
 target_link_libraries(CollatzConjectureCPP ${CMAKE_THREAD_LIBS_INIT}
                                            ${Boost_LIBRARIES}
-                                           ${OpenCL_LIBRARY})
+                                           ${OpenCL_LIBRARIES})
 

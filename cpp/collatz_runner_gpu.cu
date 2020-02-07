@@ -62,7 +62,7 @@ void CollatzRunnerGPU::join() {
 }
 
 void CollatzRunnerGPU::runner(CollatzRunnerGPU& self) {
-    self._stride = 1 << 21;
+    self._stride = ((size_t)1) << 26;
     int status;
 
     if (self._initialized) {

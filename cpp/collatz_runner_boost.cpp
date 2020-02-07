@@ -24,19 +24,19 @@ static struct c_unique {
 // boost.compute version of collatz - lets transform be used
 BOOST_COMPUTE_FUNCTION(uint64_t, collatz, (uint64_t x),
 {
-                           while (x > 1)
-                           {
-                               if (x % 2 == 0)
-                               {
-                                   x >>= 1;
-                               }
-                               else
-                               {
-                                   x = ((3 * x) + 1) >> 1;
-                               }
-                           }
+    while (x > 1)
+    {
+        if (x % 2 == 0)
+        {
+            x >>= 1;
+        }
+        else
+        {
+            x = ((3 * x) + 1) >> 1;
+        }
+    }
 
-                           return x;
+    return x;
 });
 
 CollatzRunnerBoost::CollatzRunnerBoost(CollatzCounter &counter)
@@ -62,8 +62,7 @@ void CollatzRunnerBoost::runner(CollatzRunnerBoost &self)
         std::cout << "\t" << device.name() << std::endl;
     }
 
-    boost::compute::device gpu = devices[1];
-    //boost::compute::device gpu = boost::compute::system::default_device();
+    boost::compute::device gpu = devices[0];
     boost::compute::context ctx(gpu);
     boost::compute::command_queue queue(ctx, gpu);
 
