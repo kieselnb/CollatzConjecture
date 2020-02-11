@@ -1,7 +1,7 @@
 /* Just disable the entire file if GPU was disabled */
 #include "config.h"
 
-#ifdef ENABLE_CUDA
+#ifdef ENABLE_OPENCL
 
 #include "collatz_runner_boost.h"
 #include "collatz_counter.hpp"

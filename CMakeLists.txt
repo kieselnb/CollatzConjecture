@@ -4,6 +4,10 @@ project(CollatzConjecture C CXX)
 option(ENABLE_CUDA "Enable CUDA GPU implementation of Collatz" OFF)
 if(ENABLE_CUDA)
     enable_language(CUDA)
+endif()
+
+option(ENABLE_OPENCL "Enable OpenCL GPU implementation of Collatz" OFF)
+if(ENABLE_OPENCL)
     find_package(OpenCL)
 endif()
 

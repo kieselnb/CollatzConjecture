@@ -20,8 +20,12 @@
 
 #ifdef ENABLE_CUDA
 #include "collatz_runner_gpu.cuh"
+#endif
+
+#ifdef ENABLE_OPENCL
 #include "collatz_runner_boost.h"
 #endif
+
 
 using namespace std;
 namespace po = boost::program_options;
@@ -31,8 +35,12 @@ void usage() {
         << "Options:\n"
         << "  -h [ --help ]         Display this message\n"
         << "  -n [ --numproc ] arg  Number of CPU threads to use\n"
+#ifdef ENABLE_CUDA
         << "  -g [ --gpu ]          Run the CUDA implementation on the GPU\n"
+#endif
+#ifdef ENABLE_OPENCL
         << "  -o [ --opencl ]       Run the OpenCL implementation on the GPU\n"
+#endif
         << "  -s [ --server ] arg   Start a CollatzServer on this machine\n"
         << "  -c [ --client ] arg   Point this machine as a client to the given server\n"
         << std::endl;
@@ -186,12 +194,24 @@ int main(int argc, char* argv[]) {
     }
 
     // if using GPU, last runner is GPU
-#ifdef ENABLE_CUDA
+#if defined(ENABLE_CUDA) || defined(ENABLE_OPENCL)
     if (useGPU) {
+        // do the selection if both were enabled
+#if defined(ENABLE_CUDA) && defined(ENABLE_OPENCL)
         runners[numRunners-1] = useCUDA ? (CollatzRunner*)new CollatzRunnerGPU(*counters[numRunners-1])
                                         : (CollatzRunner*)new CollatzRunnerBoost(*counters[numRunners-1]);
+#else
+        // just assign the one enabled if not both were enabled
+        runners[numRunners-1] =
+#ifdef ENABLE_CUDA
+            (CollatzRunner*)new CollatzRunnerGPU(*counters[numRunners-1]);
+#else
+            (CollatzRunner*)new CollatzRunnerBoost(*counters[numRunners-1]);
+#endif /* ENABLE_CUDA */
+
+#endif /* defined(ENABLE_CUDA) && defined(ENABLE_OPENCL) */
     }
-#endif
+#endif /* defined(ENABLE_CUDA) || defined(ENABLE_OPENCL) */
 
     // get value before threads start for perf checking
     uint64_t lastCount = collatzCounter.getCount();
