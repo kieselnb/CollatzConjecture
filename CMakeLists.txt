@@ -39,8 +39,6 @@ endif(USE_LINTER)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall")
 
-find_package(Boost REQUIRED program_options)
-
 # find threading libraries
 find_package(Threads)
 

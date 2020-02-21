@@ -8,5 +8,6 @@
 #define CONFIG_H
 
 #cmakedefine ENABLE_CUDA
+#cmakedefine ENABLE_OPENCL
 
 #endif  /* CONFIG_H */

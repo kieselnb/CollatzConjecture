@@ -8,7 +8,6 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
-#include <boost/program_options.hpp>
 
 #include "config.h"
 #include "collatz_counter.hpp"
@@ -27,9 +26,6 @@
 #endif
 
 
-using namespace std;
-namespace po = boost::program_options;
-
 void usage() {
     std::cout
         << "Options:\n"
@@ -47,37 +43,21 @@ void usage() {
 }
 
 int main(int argc, char* argv[]) {
-    // parse options
-    po::options_description desc("Options");
-    desc.add_options()
-        ("help,h", "Display this message")
-        ("numproc,n", po::value<unsigned int>(), "Number of cpu threads to use")
-#ifdef ENABLE_CUDA
-        ("gpu,g", "Activate the gpu thread")
-        ("opencl,o", "Use OpenCL to run the gpu thread")
-#endif
-        ("server,s", po::value<short>(),
-            "Start a CollatzServer on this machine")
-        ("client,c", po::value<string>(),
-            "Point this machine as a client to the given server")
-    ;
-
-    po::variables_map vm;
-    try {
-        po::store(po::parse_command_line(argc, argv, desc), vm);
-    } catch (exception& e) {
-        cerr << "Error parsing options: " << e.what() << endl << endl;
-        cerr << desc << endl;
-        return 1;
-    }
-    po::notify(vm);
-
     // get number of available threads - use either that or the
     // user-specified number of threads
-    unsigned int numProcs = thread::hardware_concurrency();
+    unsigned int numProcs{std::thread::hardware_concurrency()};
 
+    // keep track of GPU requests
+    bool useCUDA{false};
+    bool useOpenCL{false};
+
+    // only port will signify server, both populated will be client
+    int port{-1};
+    std::string serverAddress;
+
+    // parse options
     int skip = 0;
-    for (int i = 0; i < argc; i += 1 + skip) {
+    for (int i = 1; i < argc; i += 1 + skip) {
         skip = 0;
 
         std::string arg(argv[i]);
@@ -117,32 +97,78 @@ int main(int argc, char* argv[]) {
             }
             numProcs = desiredNumProcs;
         }
-    }
-
-    cout << "Using " << numProcs << " local CPU compute thread(s)." << endl;
-
-    // expose CUDA and OpenCL separately, but only use one
-
-    bool useGPU = false;
 #ifdef ENABLE_CUDA
-    bool useCUDA = false;
-    if (vm.count("gpu")) {
-        cout << "Using local GPU" << endl;
-        useGPU = true;
-        useCUDA = true;
-    }
-
-    if (vm.count("opencl")) {
-        if (useCUDA) {
-            std::cout << "Cannot use both CUDA and OpenCL simultaneously - pick one"
-                      << std::endl;
-            return 1;
+        else if (arg == "-g" || arg == "--gpu") {
+            // see if opencl was enabled already
+            if (useOpenCL) {
+                std::cerr << "Error: both OpenCL and CUDA implementations "
+                    << "requested. Pick one." << std::endl;
+                std::exit(1);
+            }
+            std::cout << "Using local NVIDIA GPU" << std::endl;
+            useCUDA = true;
         }
-        useGPU = true;
-    }
 #endif
+#ifdef ENABLE_OPENCL
+        else if (arg == "-o" || arg == "--opencl") {
+            if (useCUDA) {
+                std::cerr << "Error: both OpenCL and CUDA implementations "
+                    << "requested. Pick one." << std::endl;
+                std::exit(1);
+            }
+            useOpenCL = true;
+        }
+#endif
+        else if (arg == "-c" || arg == "--client") {
+            skip = 1;
 
-    unsigned int numRunners = useGPU ? (numProcs + 1) : numProcs;
+            // ensure another argument was given
+            if (i+skip >= argc) {
+                std::cerr << "Error: --client requires one argument" << std::endl;
+                usage();
+                std::exit(1);
+            }
+
+            // pull out server hostname/ip and port
+            std::string ipPort = argv[i+1];
+            serverAddress = ipPort.substr(0, ipPort.find(':'));
+            int given = std::stoi(ipPort.substr(ipPort.find(':') + 1));
+            if (given > std::numeric_limits<unsigned short>::max() ||
+                    given < std::numeric_limits<unsigned short>::min()) {
+                std::cerr << "Error: invalid port: " << given << std::endl;
+                std::exit(1);
+            }
+            port = given;
+        }
+        else if (arg == "-s" || arg == "--server") {
+            skip = 1;
+
+            // ensure port was given
+            if (i+skip >= argc) {
+                std::cerr << "Error: enabling server requires one argument" << std::endl;
+                usage();
+                std::exit(1);
+            }
+
+            // pull out port - ensure it is sane
+            int given = std::stoi(argv[i+1]);
+            if (given > std::numeric_limits<unsigned short>::max() ||
+                    given < std::numeric_limits<unsigned short>::min()) {
+                std::cerr << "Error: invalid port: " << given << std::endl;
+                std::exit(1);
+            }
+            port = given;
+        }
+        else {
+            std::cerr << "Unrecognized option\n" << std::endl;
+            usage();
+            std::exit(1);
+        }
+    }
+
+    std::cout << "Using " << numProcs << " local CPU compute thread(s)." << std::endl;
+
+    unsigned int numRunners = (useCUDA || useOpenCL) ? (numProcs + 1) : numProcs;
 
     // shared counter and counter protector
     // if in client config, we'll just ignore this
@@ -152,66 +178,51 @@ int main(int argc, char* argv[]) {
     // if we are in a client configuration, each will be a new instance
     // of the CollatzCounterClient class
     // otherwise, all will point to the same CollatzCointer object
-    vector<CollatzCounter*> counters(numRunners);
-
-    if (vm.count("client")) {
-        // parse arg (of form 'x.x.x.x:y' into string ip, short port
-        string ipPort = vm["client"].as<string>();
-        string serverAddress = ipPort.substr(0, ipPort.find(':'));
-        int given = stoi(ipPort.substr(ipPort.find(':') + 1));
-        if (given > numeric_limits<unsigned short>::min() &&
-                given < numeric_limits<unsigned short>::max()) {
-            auto serverPort = static_cast<unsigned short>(given);
-            for (auto & counter : counters) {
-                counter = new CollatzCounterClient(serverAddress, serverPort);
-            }
-        }
-        else {
-            cerr << "Invalid port" << endl;
-            exit(1);
-        }
-    }
-    else {
-        for (auto & counter : counters) {
-            counter = &collatzCounter;
-        }
-    }
+    std::vector<CollatzCounter*> counters(numRunners, &collatzCounter);
 
     CollatzServer* server;
-    // see if the user wants the server running on this machine
-    if (vm.count("server")) {
-        cout << "Starting server..." << endl;
-        short port = vm["server"].as<short>();
+
+    // if we have a server address, in client mode
+    if (!serverAddress.empty()) {
+        // populate the counters with new guys
+        unsigned short serverPort = static_cast<unsigned short>(port);
+        for (auto &counter : counters) {
+            counter = new CollatzCounterClient(serverAddress, serverPort);
+        }
+    }
+    else if (port != -1) {
+        // if serverAddress was empty but port was given, kick off the server
+        std::cout << "Starting server..." << std::endl;
         server = new CollatzServer(collatzCounter, port);
         server->run();
-        cout << "Starting server... done" << endl;
+        std::cout << "Starting server... done" << std::endl;
     }
 
     // kick off runners for each core
-    vector<CollatzRunner*> runners(numRunners);
+    std::vector<CollatzRunner*> runners(numRunners);
     for (unsigned int i = 0; i < numProcs; i++) {
         runners[i] = new CollatzRunnerCPU(*counters[i]);
     }
 
     // if using GPU, last runner is GPU
 #if defined(ENABLE_CUDA) || defined(ENABLE_OPENCL)
-    if (useGPU) {
-        // do the selection if both were enabled
-#if defined(ENABLE_CUDA) && defined(ENABLE_OPENCL)
-        runners[numRunners-1] = useCUDA ? (CollatzRunner*)new CollatzRunnerGPU(*counters[numRunners-1])
-                                        : (CollatzRunner*)new CollatzRunnerBoost(*counters[numRunners-1]);
-#else
-        // just assign the one enabled if not both were enabled
+    if (useCUDA || useOpenCL) {
         runners[numRunners-1] =
 #ifdef ENABLE_CUDA
-            (CollatzRunner*)new CollatzRunnerGPU(*counters[numRunners-1]);
-#else
-            (CollatzRunner*)new CollatzRunnerBoost(*counters[numRunners-1]);
-#endif /* ENABLE_CUDA */
-
-#endif /* defined(ENABLE_CUDA) && defined(ENABLE_OPENCL) */
+#ifdef ENABLE_OPENCL
+            useCUDA ?
+#endif
+            (CollatzRunner*)new CollatzRunnerGPU(*counters[numRunners-1])
+#endif
+#ifdef ENABLE_OPENCL
+#ifdef ENABLE_CUDA
+            :
+#endif
+            (CollatzRunner*)new CollatzRunnerBoost(*counters[numRunners-1])
+#endif
+            ;
     }
-#endif /* defined(ENABLE_CUDA) || defined(ENABLE_OPENCL) */
+#endif
 
     // get value before threads start for perf checking
     uint64_t lastCount = collatzCounter.getCount();
@@ -225,10 +236,10 @@ int main(int argc, char* argv[]) {
     while (true) {
         uint64_t thisCount = collatzCounter.getCount();
         float perf = float(thisCount - lastCount) / 10.0f;
-        cout << "Current: " << thisCount << ". Perf: " << perf
-            << " numbers/sec." << endl;
+        std::cout << "Current: " << thisCount << ". Perf: " << perf
+            << " numbers/sec." << std::endl;
         lastCount = thisCount;
-        this_thread::sleep_for(chrono::seconds(10));
+        std::this_thread::sleep_for(std::chrono::seconds(10));
     }
 
     return 0;
