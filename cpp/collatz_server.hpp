@@ -7,9 +7,10 @@
 #ifndef COLLATZ_SERVER_HPP
 #define COLLATZ_SERVER_HPP
 
-#include <list>
-
 #include "collatz_counter.hpp"
+
+#include <list>
+#include <thread>
 
 /**
  * This class instantiates a server on the local machine that can accept

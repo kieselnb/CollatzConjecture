@@ -8,11 +8,6 @@
 #include "collatz_counter.hpp"
 #include "collatz_network_type.hpp"
 
-#include <iostream>
-#include <thread>
-#include <cerrno>
-#include <cstring>
-
 #ifdef WIN32
 #include <WinSock2.h>
 #include <WS2tcpip.h>
@@ -25,6 +20,11 @@
 
 #include <sys/types.h>
 #include <fcntl.h>
+
+#include <iostream>
+#include <thread>
+#include <cerrno>
+#include <cstring>
 
 
 using namespace std;
