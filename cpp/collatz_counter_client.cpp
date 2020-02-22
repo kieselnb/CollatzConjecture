@@ -4,15 +4,21 @@
  * This file contains the definition of the CollatzCounterClient class.
  */
 
+#include "collatz_counter_client.hpp"
+#include "collatz_network_type.hpp"
+
 #include <iostream>
 #include <cstring>
 
+#ifdef WIN32
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+#pragma comment(lib, "Ws2_32.lib")
+#else
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-
-#include "collatz_counter_client.hpp"
-#include "collatz_network_type.hpp"
+#endif
 
 using namespace std;
 
@@ -48,7 +54,11 @@ CollatzCounterClient::CollatzCounterClient(const std::string &serverIp,
 }
 
 CollatzCounterClient::~CollatzCounterClient() {
+#ifdef WIN32
+	closesocket(_fd);
+#else
     close(_fd);
+#endif
 }
 
 uint64_t CollatzCounterClient::take(unsigned int size) {
@@ -58,13 +68,13 @@ uint64_t CollatzCounterClient::take(unsigned int size) {
 
     uint64_t toReturn = 0;
 
-    int result = send(_fd, &request, sizeof(request), 0);
+    int result = send(_fd, (char*)(&request), sizeof(request), 0);
     if (result < 0) {
         cout << "Error: failed to send" << endl;
     }
     else {
         // get result. we'll just use the same buffer since we already have it
-        result = recv(_fd, &request, sizeof(request), 0);
+        result = recv(_fd, (char*)(&request), sizeof(request), 0);
         if (result < 0) {
             cout << "Error: failed to receive" << endl;
         }
@@ -82,12 +92,12 @@ uint64_t CollatzCounterClient::getCount() {
 
     uint64_t toReturn = 0;
 
-    int result = send(_fd, &request, sizeof(request), 0);
+    int result = send(_fd, (char*)(&request), sizeof(request), 0);
     if (result < 0) {
         cout << "Error: failed to send request" << endl;
     }
     else {
-        result = recv(_fd, &request, sizeof(request), 0);
+        result = recv(_fd, (char*)(&request), sizeof(request), 0);
         if (result < 0) {
             cout << "Error: failed to receive response" << endl;
         }

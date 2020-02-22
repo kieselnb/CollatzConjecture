@@ -10,3 +10,8 @@ CMakeLists.txt.user
 
 # ignore Doxygen generated files
 doc/
+
+# ignore windows things
+.vs/
+CMakeSettings.json
+out/

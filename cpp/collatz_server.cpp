@@ -4,20 +4,28 @@
  * This file contains the definition of the CollatzServer class.
  */
 
+#include "collatz_server.hpp"
+#include "collatz_counter.hpp"
+#include "collatz_network_type.hpp"
+
 #include <iostream>
 #include <thread>
 #include <cerrno>
 #include <cstring>
 
+#ifdef WIN32
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+#define errno WSAGetLastError()
+#else
 #include <sys/socket.h>
-#include <sys/types.h>
 #include <arpa/inet.h>
-#include <fcntl.h>
 #include <unistd.h>
+#endif
 
-#include "collatz_server.hpp"
-#include "collatz_counter.hpp"
-#include "collatz_network_type.hpp"
+#include <sys/types.h>
+#include <fcntl.h>
+
 
 using namespace std;
 
@@ -29,9 +37,23 @@ CollatzServer::CollatzServer(CollatzCounter& counter, unsigned short port)
     int result;
     struct sockaddr_in address;
 
+#ifdef WIN32
+	// init the winsock2 dll
+	WSADATA wsaData;
+	int iResult;
+	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (iResult != 0) {
+		std::cerr << "WSAStartup failed: " << iResult << std::endl;
+	}
+#endif
+
     // create file descriptor
     _fd = socket(AF_INET, SOCK_STREAM, 0);
+#ifdef WIN32
+	if (_fd == INVALID_SOCKET) {
+#else
     if (_fd == 0) {
+#endif
         cerr << "Socket creation failed" << endl;
         return;
     }
@@ -57,7 +79,11 @@ CollatzServer::CollatzServer(CollatzCounter& counter, unsigned short port)
 
 CollatzServer::~CollatzServer() {
     // close all connections
+#ifdef WIN32
+	closesocket(_fd);
+#else
     close(_fd);
+#endif
 }
 
 void CollatzServer::run() {
@@ -69,17 +95,20 @@ void CollatzServer::connectionHandler(CollatzServer *server, int fd) {
     while (true) {
         int result;
         CollatzNetworkType request;
-        result = recv(fd, &request, sizeof(request), 0);
-        if (result < 0) {
-            // got some error, report it and quit
-            cout << "recv failed for " << fd << ": " << strerror(errno)
-                << endl;
+        result = recv(fd, (char*)(&request), sizeof(request), 0);
+        if (result <= 0) {
+			if (result < 0) {
+				// got some error, report it and quit
+				cout << "recv failed for " << fd << ": " << strerror(errno)
+					<< endl;
+			}
+
+			// socket either errored or closed, so clean it up
+#ifdef WIN32
+			closesocket(fd);
+#else
             close(fd);
-            return;
-        }
-        else if (result == 0) {
-            // connection closed gracefully, just quit
-            close(fd);
+#endif
             return;
         }
         else {
@@ -98,7 +127,7 @@ void CollatzServer::connectionHandler(CollatzServer *server, int fd) {
                     break;
             }
 
-            result = send(fd, &request, sizeof(request), 0);
+            result = send(fd, (char*)(&request), sizeof(request), 0);
             if (result < 0) {
                 cout << "Error: could not send response" << endl;
             }
@@ -113,7 +142,11 @@ void CollatzServer::acceptor(int sockfd, CollatzServer* server) {
         cout << "I'm listening..." << endl;
         int newsockfd = accept(sockfd, (struct sockaddr *)&clientAddr,
                 &clientLen);
+#ifdef WIN32
+		if (newsockfd == INVALID_SOCKET) {
+#else
         if (newsockfd < 0) {
+#endif
             cerr << "Error on accept" << endl;
             continue;
         }

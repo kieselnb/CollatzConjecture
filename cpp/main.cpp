@@ -5,10 +5,6 @@
  * project
  */
 
-#include <iostream>
-#include <vector>
-#include <chrono>
-
 #include "config.h"
 #include "collatz_counter.hpp"
 #include "collatz_counter_client.hpp"
@@ -16,6 +12,11 @@
 #include "collatz_runner.hpp"
 #include "collatz_runner_cpu.hpp"
 #include "collatz_server.hpp"
+
+#include <iostream>
+#include <vector>
+#include <chrono>
+#include <string>
 
 #ifdef ENABLE_CUDA
 #include "collatz_runner_gpu.cuh"
